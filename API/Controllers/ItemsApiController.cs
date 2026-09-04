@@ -1,28 +1,49 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Shared.UnifiedResult;
+
+namespace API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class ItemsApiController : BaseController<Item>
     {
-        ItemRepository _repository; 
+        private readonly ItemRepository _repository;
+
         public ItemsApiController(ItemRepository repository)
         {
-            this._repository = repository;
+            _repository = repository;
         }
 
-        // GET: api/<ItemsApiController>
         [HttpGet]
         [ActionName("GetAll")]
         [Authorize(Roles = Shared.Constant.Roles.Items.Page)]
         public async Task<Result<List<Item>>> GetAll()
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.GetAllAsync();
-            if (Result.IsSuccess && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.GetAllAsync();
+
+            if (!result.IsSuccess)
             {
-                Result.Data = Result.Data.Where(i => i.OrganizationId == userInfo.OrganizationId).ToList();
+                return result;
             }
-            return Result;
+
+            if (userInfo != null && userInfo.OrganizationId.HasValue)
+            {
+                var items = result.Data?
+                    .Where(i => i.OrganizationId == userInfo.OrganizationId.Value)
+                    .ToList()
+                    ?? new List<Item>();
+
+                return new Result<List<Item>>(
+                    result.IsSuccess,
+                    result.Error,
+                    items
+                );
+            }
+
+            return result;
         }
 
         [HttpGet]
@@ -30,66 +51,101 @@
         [Authorize]
         public async Task<Result<List<Item>>> GetList()
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.GetListAsync();
-            if (Result.IsSuccess && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.GetListAsync();
+
+            if (!result.IsSuccess)
             {
-                Result.Data = Result.Data.Where(i => i.OrganizationId == userInfo.OrganizationId).ToList();
+                return result;
             }
-            return Result;
+
+            if (userInfo != null && userInfo.OrganizationId.HasValue)
+            {
+                var items = result.Data?
+                    .Where(i => i.OrganizationId == userInfo.OrganizationId.Value)
+                    .ToList()
+                    ?? new List<Item>();
+
+                return new Result<List<Item>>(
+                    result.IsSuccess,
+                    result.Error,
+                    items
+                );
+            }
+
+            return result;
         }
 
-        // GET api/<ItemsApiController>/5
         [HttpGet("{id}")]
         [ActionName("FindById")]
         [Authorize]
         public async Task<Result<Item>> FindById(Guid id)
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.FindByIdAsync(id);
-            if (Result.IsSuccess && Result.Data != null && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.FindByIdAsync(id);
+
+            if (!result.IsSuccess)
             {
-                if (Result.Data.OrganizationId != userInfo.OrganizationId)
-                {
-                    return Result.Failure<Item>(new Shared.Constant.Roles.Error("غير مصرح بالوصول لهذا الصنف"));
-                }
+                return result;
             }
-            return Result;
+
+            if (
+                result.Data != null &&
+                userInfo != null &&
+                userInfo.OrganizationId.HasValue &&
+                result.Data.OrganizationId != userInfo.OrganizationId.Value
+            )
+            {
+                return Result.Failure<Item>(
+                    new Shared.UnifiedResult.Error(
+                        "غير مصرح بالوصول لهذا الصنف"
+                    )
+                );
+            }
+
+            return result;
         }
 
-        // POST api/<ItemsApiController>
         [HttpPost]
         [ActionName("Add")]
         [Authorize(Roles = Shared.Constant.Roles.Items.Add)]
         public async Task<Result<Item>> Add([FromBody] Item item)
         {
-            item = this.AddBaseInfo(item);
-            var Result = await this._repository.AddAsync(item);
-            return Result;
+            item = AddBaseInfo(item);
+
+            var result = await _repository.AddAsync(item);
+
+            return result;
         }
 
-        // PUT api/<ItemsApiController>/5
         [HttpPut("{id}")]
         [ActionName("Update")]
         [Authorize(Roles = Shared.Constant.Roles.Items.Update)]
-        public async Task<Result<Item>> Update(Guid id, [FromBody] Item item)
+        public async Task<Result<Item>> Update(
+            Guid id,
+            [FromBody] Item item)
         {
-            var userInfo = this.GetUserInfo();
+            var userInfo = GetUserInfo();
+
             if (userInfo != null && userInfo.OrganizationId.HasValue)
             {
                 item.OrganizationId = userInfo.OrganizationId;
             }
-            var Result = await this._repository.UpdateAsync(id, item);
-            return Result;
+
+            var result = await _repository.UpdateAsync(id, item);
+
+            return result;
         }
 
-        // DELETE api/<ItemsApiController>/5
         [HttpDelete("{id}")]
         [Authorize(Roles = Shared.Constant.Roles.Items.Delete)]
         public async Task<Result<Item>> Delete(Guid id)
         {
-            var Result = await this._repository.DeleteAsync(id);
-            return Result; 
+            var result = await _repository.DeleteAsync(id);
+
+            return result;
         }
     }
 }

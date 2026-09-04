@@ -1,27 +1,49 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Shared.UnifiedResult;
+
+namespace API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class AccountsApiController : BaseController<Account>
     {
-        AccountRepository _repository;
+        private readonly AccountRepository _repository;
+
         public AccountsApiController(AccountRepository repository)
         {
-            this._repository = repository;
+            _repository = repository;
         }
-        
+
         [HttpGet]
         [ActionName("GetAll")]
         [Authorize(Roles = Shared.Constant.Roles.Accounts.Page)]
         public async Task<Result<List<Account>>> GetAll()
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.GetAllAsync();
-            if (Result.IsSuccess && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.GetAllAsync();
+
+            if (!result.IsSuccess)
             {
-                Result.Data = Result.Data.Where(a => a.OrganizationId == userInfo.OrganizationId).ToList();
+                return result;
             }
-            return Result;
+
+            if (userInfo != null && userInfo.OrganizationId.HasValue)
+            {
+                var accounts = result.Data?
+                    .Where(a => a.OrganizationId == userInfo.OrganizationId.Value)
+                    .ToList()
+                    ?? new List<Account>();
+
+                return new Result<List<Account>>(
+                    result.IsSuccess,
+                    result.Error,
+                    accounts
+                );
+            }
+
+            return result;
         }
 
         [HttpGet]
@@ -29,13 +51,30 @@
         [Authorize]
         public async Task<Result<List<Account>>> GetList()
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.GetListAsync();
-            if (Result.IsSuccess && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.GetListAsync();
+
+            if (!result.IsSuccess)
             {
-                Result.Data = Result.Data.Where(a => a.OrganizationId == userInfo.OrganizationId).ToList();
+                return result;
             }
-            return Result;
+
+            if (userInfo != null && userInfo.OrganizationId.HasValue)
+            {
+                var accounts = result.Data?
+                    .Where(a => a.OrganizationId == userInfo.OrganizationId.Value)
+                    .ToList()
+                    ?? new List<Account>();
+
+                return new Result<List<Account>>(
+                    result.IsSuccess,
+                    result.Error,
+                    accounts
+                );
+            }
+
+            return result;
         }
 
         [HttpGet("{id}")]
@@ -43,48 +82,73 @@
         [Authorize]
         public async Task<Result<Account>> FindById(Guid id)
         {
-            var userInfo = this.GetUserInfo();
-            var Result = await this._repository.FindByIdAsync(id);
-            if (Result.IsSuccess && Result.Data != null && userInfo != null && userInfo.OrganizationId.HasValue)
+            var userInfo = GetUserInfo();
+
+            var result = await _repository.FindByIdAsync(id);
+
+            if (!result.IsSuccess)
             {
-                if (Result.Data.OrganizationId != userInfo.OrganizationId)
+                return result;
+            }
+
+            if (
+                result.Data != null &&
+                userInfo != null &&
+                userInfo.OrganizationId.HasValue
+            )
+            {
+                if (result.Data.OrganizationId != userInfo.OrganizationId.Value)
                 {
-                    return Result.Failure<Account>(new Shared.Constant.Roles.Error("غير مصرح بالوصول لهذا الحساب"));
+                    return Result.Failure<Account>(
+                        new Shared.UnifiedResult.Error(
+                            "غير مصرح بالوصول لهذا الحساب"
+                        )
+                    );
                 }
             }
-            return Result;
+
+            return result;
         }
-        
+
         [HttpPost]
         [ActionName("Add")]
-        [Authorize(Roles =Shared.Constant.Roles.Accounts.Add)]
-        public async Task<Result<Account>> Add([FromBody] Account account)
+        [Authorize(Roles = Shared.Constant.Roles.Accounts.Add)]
+        public async Task<Result<Account>> Add(
+            [FromBody] Account account)
         {
-            account = this.AddBaseInfo(account);
-            var Result = await this._repository.AddAsync(account);
-            return Result;
+            account = AddBaseInfo(account);
+
+            var result = await _repository.AddAsync(account);
+
+            return result;
         }
-        
+
         [HttpPut("{id}")]
         [ActionName("Update")]
         [Authorize(Roles = Shared.Constant.Roles.Accounts.Update)]
-        public async Task<Result<Account>> Update(Guid id, [FromBody] Account account)
+        public async Task<Result<Account>> Update(
+            Guid id,
+            [FromBody] Account account)
         {
-            var userInfo = this.GetUserInfo();
+            var userInfo = GetUserInfo();
+
             if (userInfo != null && userInfo.OrganizationId.HasValue)
             {
                 account.OrganizationId = userInfo.OrganizationId;
             }
-            var Result = await this._repository.UpdateAsync(id, account);
-            return Result;
+
+            var result = await _repository.UpdateAsync(id, account);
+
+            return result;
         }
-        
+
         [HttpDelete("{id}")]
         [Authorize(Roles = Shared.Constant.Roles.Accounts.Delete)]
         public async Task<Result<Account>> Delete(Guid id)
         {
-            var Result = await this._repository.DeleteAsync(id);
-            return Result;
+            var result = await _repository.DeleteAsync(id);
+
+            return result;
         }
     }
 }

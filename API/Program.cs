@@ -155,10 +155,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 //app cors
-app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("corsapp");
 //app.UseExceptionMiddleware();

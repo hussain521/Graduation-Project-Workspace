@@ -3,17 +3,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text; // تم إضافة هذا السطر لحل مشكلة Encoding
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Authorization
 {
-    public class JwtTokenManger: IJwtTokenManger
+    public class JwtTokenManger : IJwtTokenManger
     {
         private readonly IConfiguration _configuration;
         protected readonly ApplicationDbContext _context;
         PasswordHasher<User> _passwordHasher;
-        //protected readonly DbSet<User> _dbSet;
 
         public JwtTokenManger(IConfiguration configuration, ApplicationDbContext context)
         {
@@ -28,10 +28,9 @@ namespace Infrastructure.Authorization
             return result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded;
         }
 
-
         public string Authenticate(User login)
         {
-            var QueryResult = _context.Users.Where(u => u.Email == login.Email).ToList();//|| u.UserName==user.UserName);                        
+            var QueryResult = _context.Users.Where(u => u.Email == login.Email).ToList();                      
             if (QueryResult == null || QueryResult.Count == 0 || QueryResult.Count > 1)
                 return null;
             else
@@ -59,9 +58,9 @@ namespace Infrastructure.Authorization
                         settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                         var Json = JsonConvert.SerializeObject(userinfo, settings);
 
-
+                        // تم تصحيح الشرط الخاص بـ ur.Value هنا
                         var userRoles = _context.UserRoles
-                            .Where(ur => ur.UserId == first.Id && ur.OrganizationId == first.OrganizationId && ur.IsActive == true && (ur.Value ?? false))
+                            .Where(ur => ur.UserId == first.Id && ur.OrganizationId == first.OrganizationId && ur.IsActive == true && ur.Value == true)
                             .Select(ur => ur.RoleId.ToString())
                             .ToList();
 
