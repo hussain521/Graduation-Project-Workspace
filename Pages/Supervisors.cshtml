@@ -1,0 +1,77 @@
+@page
+@model GraduationProject.Pages.SupervisorsModel
+@{
+    ViewData["Title"] = "Faculty Advisors & Supervisors";
+}
+
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                Faculty <span class="text-emerald-400">Advisors Roster</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+                Faculty mentors, research specializations, and student supervision capacities.
+            </p>
+        </div>
+        <div class="font-mono text-xs text-slate-400">
+            Total Advisors: <strong class="text-emerald-400">@Model.Supervisors.Count Faculty Members</strong>
+        </div>
+    </div>
+
+    <!-- Faculty Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var sup in Model.Supervisors)
+        {
+            var capacity = Math.Max(0, sup.MaxProjectsQuota - sup.SupervisedProjects.Count);
+            <div class="rounded-3xl bg-slate-900/80 p-6 flex flex-col justify-between space-y-6 hover:bg-slate-850 transition-colors">
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                        <img src="@sup.AvatarUrl" alt="@sup.FullName" class="w-16 h-16 rounded-2xl object-cover bg-slate-800 shrink-0" />
+                        <div class="min-w-0 flex-1">
+                            <span class="text-xs font-mono text-emerald-400 uppercase">@sup.Title</span>
+                            <h3 class="font-display text-lg font-bold text-white truncate">@sup.FullName</h3>
+                            <p class="text-xs text-slate-400 truncate">@sup.Department</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-950 text-slate-300 leading-relaxed">
+                            <strong class="text-slate-400 font-mono block text-[10px] uppercase mb-1">Research Focus</strong>
+                            @sup.ResearchInterests
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-4">
+                    <!-- Capacity Gauge -->
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400">Supervision Load</span>
+                            <span class="font-mono @(capacity > 0 ? "text-emerald-400" : "text-amber-400") font-medium">
+                                @sup.SupervisedProjects.Count / @sup.MaxProjectsQuota Projects
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            @{
+                                var pct = (int)((sup.SupervisedProjects.Count / (double)sup.MaxProjectsQuota) * 100);
+                            }
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: @Math.Min(100, pct)%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Office -->
+                    <div class="p-3 rounded-xl bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
+                        <span class="truncate">Office: @sup.OfficeLocation</span>
+                        <a href="mailto:@sup.Email" class="text-emerald-400 hover:underline font-mono text-[11px] shrink-0">
+                            Email &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>

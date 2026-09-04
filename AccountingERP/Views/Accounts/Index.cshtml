@@ -1,0 +1,300 @@
+@model List<AccountingERP.Models.AccountDto>
+@{
+    ViewData["Title"] = "دليل الحسابات المالية";
+    var allAccounts = ViewBag.AllAccounts as List<AccountingERP.Models.AccountDto> ?? new List<AccountingERP.Models.AccountDto>();
+}
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-sitemap text-teal me-2"></i> دليل الحسابات المالية (شجرة الحسابات)</h3>
+        <p class="text-muted mb-0">إدارة هيكل دليل الحسابات الرئيسي والفرعي والتحكم بخصائص الحسابات</p>
+    </div>
+    <button class="btn btn-primary-custom" onclick="openAddAccountModal()">
+        <i class="fa-solid fa-plus me-1"></i> إضافة حساب جديد
+    </button>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card-custom">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>رمز الحساب</th>
+                            <th>اسم الحساب (عربي)</th>
+                            <th>الحساب الرئيسي</th>
+                            <th>نوع الحساب</th>
+                            <th>فئة الحساب</th>
+                            <th>الرصيد الافتتاحي</th>
+                            <th>الحالة</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var acc in allAccounts)
+                        {
+                            <tr style="padding-right: @((acc.Level - 1) * 20)px;">
+                                <td>
+                                    <span class="font-monospace fw-bold px-2 py-1 bg-light rounded text-teal">@acc.Code</span>
+                                </td>
+                                <td class="fw-bold">
+                                    @if (acc.AccountCategory == AccountingERP.Models.AccountCategory.Header)
+                                    {
+                                        <i class="fa-solid fa-folder-tree text-warning me-1"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-file-invoice text-teal me-1"></i>
+                                    }
+                                    @acc.NameAr
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(acc.ParentAccountName))
+                                    {
+                                        <span class="badge bg-light text-muted border">@acc.ParentAccountCode - @acc.ParentAccountName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">حساب جذر</span>
+                                    }
+                                </td>
+                                <td><span class="badge bg-teal-subtle text-teal">@acc.AccountTypeTitle</span></td>
+                                <td>
+                                    @if (acc.AccountCategory == AccountingERP.Models.AccountCategory.Header)
+                                    {
+                                        <span class="badge bg-secondary">رئيسي</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">فرعي (تحليلي)</span>
+                                    }
+                                </td>
+                                <td class="font-monospace fw-bold">@acc.OpeningBalance.ToString("N2") ر.س</td>
+                                <td>
+                                    @if (acc.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">نشط</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">موقوف</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle" onclick="editAccount('@acc.Id')" title="تعديل">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle ms-1" onclick="deleteAccount('@acc.Id')" title="حذف">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create / Edit Account -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-teal text-white rounded-top-4" style="background-color: #0f766e;">
+                <h5 class="modal-title fw-bold" id="modalTitle"><i class="fa-solid fa-folder-plus me-2"></i> إضافة حساب جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="accountForm">
+                    <input type="hidden" id="accountId" name="Id" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">الحساب الرئيسي (الأب)</label>
+                            <select id="parentAccountId" name="ParentAccountId" class="form-select" onchange="onParentChange()">
+                                <option value="">-- حساب رئيسي أولي (جذر) --</option>
+                                @foreach (var p in allAccounts)
+                                {
+                                    <option value="@p.Id" data-type="@((int)p.AccountType)">@p.Code - @p.NameAr</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">نوع الحساب</label>
+                            <select id="accountType" name="AccountType" class="form-select" required>
+                                <option value="1">أصول</option>
+                                <option value="2">خصوم (التزامات)</option>
+                                <option value="3">حقوق ملكية</option>
+                                <option value="4">إيرادات</option>
+                                <option value="5">مصروفات</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">كود / رمز الحساب <span class="text-danger">*</span></label>
+                            <input type="text" id="accountCode" name="Code" class="form-control font-monospace" required placeholder="مثال: 1101" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">اسم الحساب (بالعربي) <span class="text-danger">*</span></label>
+                            <input type="text" id="accountNameAr" name="NameAr" class="form-control" required placeholder="اسم الحساب..." />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">فئة الحساب</label>
+                            <select id="accountCategory" name="AccountCategory" class="form-select" required>
+                                <option value="2">فرعي (تحليلي - تقبل عليه القيود)</option>
+                                <option value="1">رئيسي (تجميعي)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">الرصيد الافتتاحي</label>
+                            <input type="number" step="0.01" id="openingBalance" name="OpeningBalance" class="form-control font-monospace" value="0.00" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">طبيعة الحساب</label>
+                            <select id="isDebitNature" name="IsDebitNature" class="form-select">
+                                <option value="true">مدين (Debit)</option>
+                                <option value="false">دائن (Credit)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
+                                <label class="form-check-input-label fw-bold ms-2" for="isActive">الحساب نشط ومستعمل</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary-custom px-4" onclick="saveAccount()">حفظ الحساب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function getAntiforgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+
+        function openAddAccountModal() {
+            $('#accountForm')[0].reset();
+            $('#accountId').val('');
+            $('#modalTitle').html('<i class="fa-solid fa-folder-plus me-2"></i> إضافة حساب جديد');
+            var modal = new bootstrap.Modal(document.getElementById('accountModal'));
+            modal.show();
+        }
+
+        function onParentChange() {
+            var parentId = $('#parentAccountId').val();
+            var type = $('#accountType').val();
+            if (parentId) {
+                var selectedOpt = $('#parentAccountId option:selected');
+                var dataType = selectedOpt.data('type');
+                if (dataType) $('#accountType').val(dataType);
+
+                $.get('/Accounts/GetNextCode?parentId=' + parentId + '&type=' + type, function(res) {
+                    if (res.code) $('#accountCode').val(res.code);
+                });
+            }
+        }
+
+        function saveAccount() {
+            var id = $('#accountId').val();
+            var isEdit = !!id;
+
+            var dto = {
+                Id: id || null,
+                Code: $('#accountCode').val(),
+                NameAr: $('#accountNameAr').val(),
+                ParentAccountId: $('#parentAccountId').val() || null,
+                AccountType: parseInt($('#accountType').val()),
+                AccountCategory: parseInt($('#accountCategory').val()),
+                OpeningBalance: parseFloat($('#openingBalance').val()) || 0,
+                IsDebitNature: $('#isDebitNature').val() === 'true',
+                IsActive: $('#isActive').is(':checked')
+            };
+
+            var url = isEdit ? '/Accounts/Edit' : '/Accounts/Create';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                data: JSON.stringify(dto),
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم بنجاح',
+                        text: res.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                },
+                error: function(err) {
+                    var msg = err.responseJSON ? err.responseJSON.message : 'حدث خطأ أثناء الاتصال بالنظام';
+                    Swal.fire('خطأ في البيانات', msg, 'error');
+                }
+            });
+        }
+
+        function editAccount(id) {
+            $.get('/Accounts/GetAccount/' + id, function(acc) {
+                $('#accountId').val(acc.id);
+                $('#accountCode').val(acc.code);
+                $('#accountNameAr').val(acc.nameAr);
+                $('#parentAccountId').val(acc.parentAccountId || '');
+                $('#accountType').val(acc.accountType);
+                $('#accountCategory').val(acc.accountCategory);
+                $('#openingBalance').val(acc.openingBalance);
+                $('#isDebitNature').val(acc.isDebitNature ? 'true' : 'false');
+                $('#isActive').prop('checked', acc.isActive);
+
+                $('#modalTitle').html('<i class="fa-solid fa-pen me-2"></i> تعديل بيانات الحساب');
+                var modal = new bootstrap.Modal(document.getElementById('accountModal'));
+                modal.show();
+            });
+        }
+
+        function deleteAccount(id) {
+            Swal.fire({
+                title: 'تأكيد الحذف',
+                text: "هل أنت تأكد من رغبتك في حذف هذا الحساب؟",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Accounts/Delete?id=' + id,
+                        type: 'POST',
+                        headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                        success: function(res) {
+                            Swal.fire('تم الحذف', res.message, 'success').then(() => location.reload());
+                        },
+                        error: function(err) {
+                            var msg = err.responseJSON ? err.responseJSON.message : 'حدث خطأ أثناء الحذف';
+                            Swal.fire('تعذر الحذف', msg, 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

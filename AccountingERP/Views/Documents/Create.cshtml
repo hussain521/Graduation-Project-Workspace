@@ -1,0 +1,239 @@
+@model AccountingERP.Models.CreateUpdateDocumentViewModel
+@{
+    ViewData["Title"] = "إعداد قيد / سند جديد";
+    var accounts = ViewBag.Accounts as List<AccountingERP.Models.AccountDto> ?? new List<AccountingERP.Models.AccountDto>();
+}
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-file-pen text-teal me-2"></i> إنشاء مستند محاسبي جديد</h3>
+        <p class="text-muted mb-0">قم بإدخال بيانات القيد المحاسبي وتفاصيل الحسابات المدينة والدائنة</p>
+    </div>
+    <a href="@Url.Action("Index", "Documents")" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="fa-solid fa-arrow-right me-1"></i> العودة للقائمة
+    </a>
+</div>
+
+<div class="card-custom">
+    <form id="docForm">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">نوع المستند</label>
+                <select id="docType" name="DocumentType" class="form-select fw-bold text-teal">
+                    <option value="1" selected="@(Model.DocumentType == AccountingERP.Models.DocumentType.JournalVoucher)">قيد يومية</option>
+                    <option value="2" selected="@(Model.DocumentType == AccountingERP.Models.DocumentType.PaymentVoucher)">سند صرف</option>
+                    <option value="3" selected="@(Model.DocumentType == AccountingERP.Models.DocumentType.ReceiptVoucher)">سند قبض</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">رقم القيد / السند</label>
+                <input type="text" id="docNumber" name="DocumentNumber" class="form-control font-monospace fw-bold bg-light" value="@Model.DocumentNumber" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">التاريخ <span class="text-danger">*</span></label>
+                <input type="date" id="docDate" name="DocumentDate" class="form-control" value="@Model.DocumentDate.ToString("yyyy-MM-dd")" required />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">رقم المرجع (إن وجد)</label>
+                <input type="text" id="refNumber" name="ReferenceNumber" class="form-control" placeholder="مثال: فاتورة #1042" />
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold">البيان / الشرح العام للقيد <span class="text-danger">*</span></label>
+                <input type="text" id="docNotes" name="Notes" class="form-control" required placeholder="أدخل البيان العام للمستند المحاسبي..." />
+            </div>
+        </div>
+
+        <!-- Document Details Lines Table -->
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-teal me-2"></i> تفاصيل أسطر القيد المحاسبي</h5>
+        <div class="table-responsive mb-3">
+            <table class="table table-bordered align-middle" id="detailsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th style="width: 30%;">اسم الحساب <span class="text-danger">*</span></th>
+                        <th style="width: 18%;">مدين (Debit)</th>
+                        <th style="width: 18%;">دائن (Credit)</th>
+                        <th style="width: 24%;">ملاحظات السطر</th>
+                        <th style="width: 10%;" class="text-center">حذف</th>
+                    </tr>
+                </thead>
+                <tbody id="detailsBody">
+                    <!-- Rows rendered dynamically -->
+                </tbody>
+                <tfoot>
+                    <tr class="fw-bold bg-light">
+                        <td class="text-end">الإجمالي:</td>
+                        <td class="text-primary font-monospace fs-5" id="totalDebitCell">0.00</td>
+                        <td class="text-danger font-monospace fs-5" id="totalCreditCell">0.00</td>
+                        <td colspan="2">
+                            <span id="balanceStatus" class="badge bg-danger p-2 fs-6">غير متوازن (الفرق: 0.00)</span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-outline-teal rounded-pill px-4" onclick="addRow()">
+                <i class="fa-solid fa-plus me-1"></i> إضافة سطر جديد
+            </button>
+
+            <button type="button" class="btn btn-primary-custom px-5 py-2 fs-6" onclick="submitDoc()">
+                <i class="fa-solid fa-save me-2"></i> حفظ القيد المحاسبي
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        var accountsList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(accounts));
+
+        function getAntiforgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+
+        $(document).ready(function() {
+            // Add two initial rows for debit and credit
+            addRow();
+            addRow();
+        });
+
+        function addRow() {
+            var options = '<option value="">-- اختر الحساب --</option>';
+            accountsList.forEach(function(a) {
+                options += '<option value="' + a.Id + '">' + a.Code + ' - ' + a.NameAr + '</option>';
+            });
+
+            var rowHtml = `
+                <tr>
+                    <td>
+                        <select class="form-select account-select" required>
+                            ${options}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" class="form-control font-monospace debit-input" value="0.00" oninput="calculateTotals(this, 'debit')" />
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" class="form-control font-monospace credit-input" value="0.00" oninput="calculateTotals(this, 'credit')" />
+                    </td>
+                    <td>
+                        <input type="text" class="form-control notes-input" placeholder="ملاحظات السطر..." />
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" onclick="removeRow(this)">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $('#detailsBody').append(rowHtml);
+            calculateTotals();
+        }
+
+        function removeRow(btn) {
+            if ($('#detailsBody tr').length <= 2) {
+                Swal.fire('تنبيه', 'يجب أن يحتوي القيد على سطرين على الأقل', 'warning');
+                return;
+            }
+            $(btn).closest('tr').remove();
+            calculateTotals();
+        }
+
+        function calculateTotals(input, type) {
+            if (input && type) {
+                var row = $(input).closest('tr');
+                if (type === 'debit' && parseFloat($(input).val()) > 0) {
+                    row.find('.credit-input').val('0.00');
+                } else if (type === 'credit' && parseFloat($(input).val()) > 0) {
+                    row.find('.debit-input').val('0.00');
+                }
+            }
+
+            var totalDebit = 0;
+            var totalCredit = 0;
+
+            $('.debit-input').each(function() {
+                totalDebit += parseFloat($(this).val()) || 0;
+            });
+
+            $('.credit-input').each(function() {
+                totalCredit += parseFloat($(this).val()) || 0;
+            });
+
+            $('#totalDebitCell').text(totalDebit.toFixed(2));
+            $('#totalCreditCell').text(totalCredit.toFixed(2));
+
+            var diff = Math.abs(totalDebit - totalCredit);
+            if (diff < 0.001 && totalDebit > 0) {
+                $('#balanceStatus').removeClass('bg-danger').addClass('bg-success').text('متوازن ✓');
+            } else {
+                $('#balanceStatus').removeClass('bg-success').addClass('bg-danger').text('غير متوازن (الفرق: ' + diff.toFixed(2) + ' ر.س)');
+            }
+        }
+
+        function submitDoc() {
+            var details = [];
+            var hasAccountError = false;
+
+            $('#detailsBody tr').each(function() {
+                var accId = $(this).find('.account-select').val();
+                var debit = parseFloat($(this).find('.debit-input').val()) || 0;
+                var credit = parseFloat($(this).find('.credit-input').val()) || 0;
+                var notes = $(this).find('.notes-input').val();
+
+                if (!accId) hasAccountError = true;
+
+                details.push({
+                    AccountId: accId,
+                    Debit: debit,
+                    Credit: credit,
+                    LineNotes: notes
+                });
+            });
+
+            if (hasAccountError) {
+                Swal.fire('خطأ في البيانات', 'يرجى تحديد الحساب في كافة أسطر القيد', 'error');
+                return;
+            }
+
+            var dto = {
+                DocumentType: parseInt($('#docType').val()),
+                DocumentNumber: parseInt($('#docNumber').val()) || 0,
+                DocumentDate: $('#docDate').val(),
+                ReferenceNumber: $('#refNumber').val(),
+                Notes: $('#docNotes').val(),
+                Details: details
+            };
+
+            $.ajax({
+                url: '/Documents/Create',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                data: JSON.stringify(dto),
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحفظ بنجاح',
+                        text: res.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/Documents';
+                    });
+                },
+                error: function(err) {
+                    var msg = err.responseJSON ? err.responseJSON.message : 'حدث خطأ أثناء حفظ القيد المحاسبي';
+                    Swal.fire('تعذر الحفظ', msg, 'error');
+                }
+            });
+        }
+    </script>
+}

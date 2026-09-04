@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#070b14] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexusGrad | Senior Graduation Project Workspace</title>
+  
+  <!-- Modern Typography Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Cabinet Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="min-h-[100dvh] flex flex-col bg-[#070b14] text-slate-100 font-sans overflow-x-hidden">
+
+  <!-- Rule 8 Floating Pill Header -->
+  <div class="header-shell fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none" id="headerShell">
+    <header id="mainHeader" class="header-bar pointer-events-auto flex items-center justify-between w-full max-w-[1400px] px-6 py-4 bg-slate-900/90 backdrop-blur-md">
+      <!-- Brand Logo Lockup -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform duration-200">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-display text-lg font-bold tracking-tight text-white flex items-center gap-1">
+              Nexus<span class="text-emerald-400 font-black">Grad</span>
+            </span>
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest hidden sm:inline">Workspace Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Nav Items (Short, Nowrap per Rule 7) -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/" class="text-emerald-400 font-semibold whitespace-nowrap">Dashboard</a>
+        <a href="/projects" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Projects</a>
+        <a href="/milestones" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Milestones</a>
+        <a href="/defense" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Defense & Rubric</a>
+        <a href="/supervisors" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Supervisors</a>
+      </nav>
+
+      <!-- Action CTAs -->
+      <div class="flex items-center gap-3">
+        <a href="/api-docs" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          API Docs
+        </a>
+        <a href="/projects#submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-emerald-500 text-slate-950 hover:bg-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+          <span>Submit Project</span>
+        </a>
+      </div>
+    </header>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 w-full pt-28 pb-16">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-16">
+
+      <!-- Hero Section (Rule 1 & Rule 3: Split Asymmetric, Solid Typography, Solid Accent Word Emphasis) -->
+      <section class="relative rounded-3xl bg-gradient-to-b from-slate-900/90 to-slate-950 p-8 sm:p-12 overflow-hidden shadow-2xl shadow-black/40">
+        <div class="absolute -right-24 -top-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <!-- Left Copy -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Academic Year 2025-2026 Live Portal</span>
+            </div>
+
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-none text-white">
+              Senior Engineering <span class="text-emerald-400">Graduation Workspace</span>
+            </h1>
+
+            <p class="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
+              Track milestones, coordinate advisor mentorship, schedule defense hearings, and certify capstone engineering projects with real-time ABET rubric evaluations.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+              <a href="/projects" class="px-6 py-3.5 rounded-full bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-500/25 flex items-center gap-2 text-sm">
+                <span>Explore Project Catalog</span>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </a>
+              <a href="/milestones" class="px-6 py-3.5 rounded-full bg-slate-800 text-slate-200 font-medium hover:bg-slate-700 active:scale-95 transition-all text-sm">
+                <span>Milestone Board</span>
+              </a>
+              <a href="/defense" class="px-6 py-3.5 rounded-full bg-slate-800/60 text-slate-300 font-medium hover:bg-slate-700 active:scale-95 transition-all text-sm">
+                <span>Committee Rubric</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Bento Stat Cards -->
+          <div class="lg:col-span-5 grid grid-cols-2 gap-4" id="statsContainer">
+            <div class="p-6 rounded-2xl bg-slate-800/70 backdrop-blur-sm space-y-2">
+              <span class="text-xs font-mono text-slate-400 uppercase">Active Projects</span>
+              <div class="font-display text-3xl sm:text-4xl font-black text-white font-mono" id="statProjects">6</div>
+              <p class="text-xs text-emerald-400 flex items-center gap-1 font-medium" id="statSub">
+                <span>2 Defended</span> • <span>4 In Progress</span>
+              </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-800/70 backdrop-blur-sm space-y-2">
+              <span class="text-xs font-mono text-slate-400 uppercase">Graduating Seniors</span>
+              <div class="font-display text-3xl sm:text-4xl font-black text-white font-mono" id="statStudents">11</div>
+              <p class="text-xs text-slate-400">Computer Science & Eng.</p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-800/70 backdrop-blur-sm space-y-2">
+              <span class="text-xs font-mono text-slate-400 uppercase">Faculty Advisors</span>
+              <div class="font-display text-3xl sm:text-4xl font-black text-white font-mono" id="statSupervisors">5</div>
+              <p class="text-xs text-slate-400">Research Professors</p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-emerald-950/40 p-6 space-y-2">
+              <span class="text-xs font-mono text-emerald-400 uppercase">Average Grade</span>
+              <div class="font-display text-3xl sm:text-4xl font-black text-emerald-400 font-mono" id="statAvg">95.3<span class="text-lg text-emerald-500/70 font-sans">%</span></div>
+              <p class="text-xs text-slate-300">Defense Committee Avg</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2-Column Bento: Official Notices & Defense Hearings -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Notices (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-display text-2xl font-bold text-white">Official Notices</h2>
+              <p class="text-sm text-slate-400">Committee guidelines, submission deadlines, and regulations</p>
+            </div>
+            <span class="text-xs font-mono text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10">Active Term</span>
+          </div>
+
+          <div class="space-y-4" id="announcementsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Upcoming Defenses (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-display text-2xl font-bold text-white">Defense Hearings</h2>
+              <p class="text-sm text-slate-400">Upcoming committee jury sessions</p>
+            </div>
+            <a href="/defense" class="text-xs font-mono text-emerald-400 hover:underline">View All &rarr;</a>
+          </div>
+
+          <div class="space-y-4" id="defensesList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Distinguished Projects Showcase -->
+      <section class="space-y-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-3xl font-bold text-white">Distinguished Projects</h2>
+            <p class="text-sm text-slate-400 mt-1">High-impact engineering capstones evaluated by faculty juries</p>
+          </div>
+          <a href="/projects" class="text-sm font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5">
+            <span>Browse all projects</span>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="featuredProjectsGrid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto bg-slate-900/60 py-12 px-6">
+    <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-400">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /></svg>
+        </div>
+        <p class="font-medium text-slate-300">NexusGrad Graduation Project Management System</p>
+      </div>
+      <div class="flex items-center gap-6 text-xs font-mono">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>System Status: Online</span>
+        </span>
+        <a href="/api-docs" class="text-emerald-400 hover:underline">REST API Console</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/header.js"></script>
+  <script>
+    async function loadDashboard() {
+      try {
+        const [stats, announcements, projects] = await Promise.all([
+          fetch('/api/stats').then(r => r.json()),
+          fetch('/api/announcements').then(r => r.json()),
+          fetch('/api/projects').then(r => r.json())
+        ]);
+
+        // Render Stats
+        document.getElementById('statProjects').innerText = stats.totalProjects;
+        document.getElementById('statStudents').innerText = stats.totalStudents;
+        document.getElementById('statSupervisors').innerText = stats.totalSupervisors;
+        document.getElementById('statAvg').innerHTML = `${stats.avgScore}<span class="text-lg text-emerald-500/70 font-sans">%</span>`;
+        document.getElementById('statSub').innerHTML = `<span>${stats.defendedProjects} Defended</span> • <span>${stats.inProgressProjects} In Progress</span>`;
+
+        // Render Announcements
+        const annContainer = document.getElementById('announcementsList');
+        annContainer.innerHTML = announcements.map(a => {
+          const badgeClass = a.priority === 'Urgent' ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400';
+          return `
+            <div class="p-6 rounded-2xl bg-slate-900/80 hover:bg-slate-850 transition-colors space-y-3">
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-xs font-mono uppercase px-2.5 py-1 rounded-md ${badgeClass} font-medium">${a.category} • ${a.priority}</span>
+                <span class="text-xs font-mono text-slate-400">${new Date(a.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">${a.title}</h3>
+              <p class="text-sm text-slate-300 leading-relaxed">${a.content}</p>
+              ${a.actionLabel ? `
+                <a href="${a.actionUrl}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors pt-1">
+                  <span>${a.actionLabel}</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+
+        // Render Upcoming Defenses
+        const defContainer = document.getElementById('defensesList');
+        if (stats.upcomingDefenses && stats.upcomingDefenses.length > 0) {
+          defContainer.innerHTML = stats.upcomingDefenses.map(d => `
+            <div class="p-5 rounded-2xl bg-slate-900/80 hover:bg-slate-850 transition-colors space-y-2.5">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <span class="text-xs font-mono text-emerald-400 block">${new Date(d.defenseDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                  <h4 class="text-sm font-bold text-white mt-0.5 line-clamp-1">${d.title}</h4>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                <span class="flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                  ${d.defenseRoom || 'TBD'}
+                </span>
+                <span class="text-slate-300 font-medium">Advisor: ${d.supervisor}</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          defContainer.innerHTML = `<div class="p-8 rounded-2xl bg-slate-900/50 text-center text-slate-400 text-sm">No upcoming defense sessions scheduled.</div>`;
+        }
+
+        // Render Featured Projects
+        const featGrid = document.getElementById('featuredProjectsGrid');
+        const sorted = [...projects].sort((a, b) => (b.finalGrade || 0) - (a.finalGrade || 0)).slice(0, 4);
+        featGrid.innerHTML = sorted.map(p => `
+          <div class="p-6 rounded-3xl bg-slate-900/80 hover:bg-slate-850 transition-all flex flex-col justify-between space-y-6 group">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-xs font-mono uppercase px-3 py-1 rounded-full bg-slate-800 text-slate-300">${p.track}</span>
+                ${p.finalGrade ? `<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400">Grade: ${p.finalGrade}%</span>` : `<span class="text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">${p.status}</span>`}
+              </div>
+              <h3 class="font-display text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">${p.title}</h3>
+              <p class="text-sm text-slate-300 line-clamp-3 leading-relaxed">${p.abstract}</p>
+            </div>
+
+            <div class="space-y-4 pt-4">
+              <div class="flex flex-wrap gap-1.5">
+                ${(p.techStack || '').split(',').slice(0, 4).map(t => `<span class="text-[11px] font-mono px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300">${t.trim()}</span>`).join('')}
+              </div>
+              <div class="flex items-center justify-between pt-2">
+                <div class="flex items-center gap-2">
+                  ${p.supervisor ? `
+                    <img src="${p.supervisor.avatarUrl}" alt="${p.supervisor.fullName}" class="w-7 h-7 rounded-full object-cover bg-slate-800" />
+                    <span class="text-xs text-slate-400">Adv: <strong class="text-slate-200 font-medium">${p.supervisor.fullName}</strong></span>
+                  ` : ''}
+                </div>
+                <a href="/projects?id=${p.id}" class="text-xs font-semibold text-emerald-400 hover:text-emerald-300">View Details &rarr;</a>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error("Dashboard error:", err);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

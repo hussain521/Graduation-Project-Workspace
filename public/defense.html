@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#070b14] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Defense Hearings & ABET Rubric | NexusGrad</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Cabinet Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="min-h-[100dvh] flex flex-col bg-[#070b14] text-slate-100 font-sans overflow-x-hidden">
+
+  <!-- Floating Pill Header -->
+  <div class="header-shell fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none" id="headerShell">
+    <header id="mainHeader" class="header-bar pointer-events-auto flex items-center justify-between w-full max-w-[1400px] px-6 py-4 bg-slate-900/90 backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform duration-200">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /></svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-display text-lg font-bold tracking-tight text-white flex items-center gap-1">
+              Nexus<span class="text-emerald-400 font-black">Grad</span>
+            </span>
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest hidden sm:inline">Workspace Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Dashboard</a>
+        <a href="/projects" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Projects</a>
+        <a href="/milestones" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Milestones</a>
+        <a href="/defense" class="text-emerald-400 font-semibold whitespace-nowrap">Defense & Rubric</a>
+        <a href="/supervisors" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Supervisors</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="/api-docs" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          API Docs
+        </a>
+        <a href="/projects#submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-emerald-500 text-slate-950 hover:bg-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+          <span>Submit Project</span>
+        </a>
+      </div>
+    </header>
+  </div>
+
+  <main class="flex-1 w-full pt-28 pb-16">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+            Defense Hearings & <span class="text-emerald-400">Scoring Rubric</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-300 mt-1">
+            Standardized 100-point academic committee evaluation criteria
+          </p>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full">
+          <span>Minimum Passing Grade: 60/100</span>
+        </div>
+      </div>
+
+      <!-- Main 2-Column Interface -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Form (7 Cols) -->
+        <div class="lg:col-span-7 rounded-3xl bg-slate-900/90 p-6 sm:p-8 space-y-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-xl font-bold text-white">Committee Scoring Form</h3>
+            <span class="text-xs font-mono text-slate-400">ABET Criteria Aligned</span>
+          </div>
+
+          <form id="evaluationForm" onsubmit="handleEvaluationSubmit(event)" class="space-y-6 text-sm">
+            <div>
+              <label class="block text-xs font-mono text-slate-300 uppercase mb-2">Graduation Project Under Review *</label>
+              <select id="evalProjectId" required class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-400 outline-none text-sm font-medium">
+                <option value="">-- Choose Project --</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Evaluator / Examiner Name *</label>
+                <input type="text" id="evaluatorName" required placeholder="e.g. Dr. Marcus Vance" value="Dr. Marcus Vance" class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Jury Role</label>
+                <select id="evaluatorRole" class="w-full bg-slate-800 text-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none">
+                  <option value="Internal Examiner">Internal Examiner</option>
+                  <option value="External Examiner">External Examiner</option>
+                  <option value="Primary Supervisor">Primary Supervisor</option>
+                  <option value="Committee Chair">Committee Chair</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Rubric Dimensions -->
+            <div class="space-y-4 pt-2">
+              <h4 class="text-xs font-mono text-emerald-400 uppercase tracking-wider">Evaluation Dimensions (100 pts)</h4>
+
+              <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">1. Technical Implementation & Architecture (Max 40)</span>
+                  <span id="implVal" class="font-mono text-emerald-400 font-bold text-sm">36 / 40</span>
+                </div>
+                <input type="range" id="scoreImpl" min="0" max="40" step="0.5" value="36" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                <p class="text-[11px] text-slate-400">Software correctness, robust architecture, test coverage, and execution.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">2. Presentation & Defense Q&A (Max 20)</span>
+                  <span id="presVal" class="font-mono text-emerald-400 font-bold text-sm">18 / 20</span>
+                </div>
+                <input type="range" id="scorePres" min="0" max="20" step="0.5" value="18" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                <p class="text-[11px] text-slate-400">Clarity of delivery, slide professionalism, and mastery during jury questioning.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">3. Final Thesis & Technical Documentation (Max 20)</span>
+                  <span id="docVal" class="font-mono text-emerald-400 font-bold text-sm">18.5 / 20</span>
+                </div>
+                <input type="range" id="scoreDoc" min="0" max="20" step="0.5" value="18.5" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                <p class="text-[11px] text-slate-400">Report structure, literature review, citations, and system diagrams.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-white">4. Innovation & Practical Impact (Max 20)</span>
+                  <span id="innovVal" class="font-mono text-emerald-400 font-bold text-sm">19 / 20</span>
+                </div>
+                <input type="range" id="scoreInnov" min="0" max="20" step="0.5" value="19" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                <p class="text-[11px] text-slate-400">Novelty of contribution, real-world utility, and creative problem solving.</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Examiner Qualitative Remarks</label>
+              <textarea id="evalComments" rows="3" class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none">Excellent defense delivery and thorough experimental validation.</textarea>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-emerald-950/40 flex items-center justify-between">
+              <div>
+                <span class="text-xs font-mono text-emerald-400 uppercase">Calculated Grade</span>
+                <div class="text-xs text-slate-300">Composite Jury Score</div>
+              </div>
+              <div class="text-right">
+                <span id="totalScoreDisplay" class="font-display text-3xl font-black text-emerald-400 font-mono">91.5 / 100</span>
+                <span class="block text-[11px] font-mono text-emerald-300">STATUS: DISTINCTION (PASS)</span>
+              </div>
+            </div>
+
+            <div id="evalAlert" class="hidden p-3 rounded-xl bg-emerald-500/10 text-emerald-400 text-xs"></div>
+
+            <button type="submit" id="evalSubmitBtn" class="w-full py-3.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 active:scale-98 transition-all shadow-lg shadow-emerald-500/20 text-sm">
+              Submit Official Committee Evaluation
+            </button>
+          </form>
+        </div>
+
+        <!-- History (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Certified Defense Records</h3>
+              <p class="text-xs text-slate-400">Recent evaluations from academic juries</p>
+            </div>
+          </div>
+          <div class="space-y-4" id="evalHistory"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/header.js"></script>
+  <script>
+    let projects = [];
+
+    async function initDefense() {
+      projects = await fetch('/api/projects').then(r => r.json());
+      const select = document.getElementById('evalProjectId');
+      const params = new URLSearchParams(window.location.search);
+      const selId = params.get('projectId');
+
+      select.innerHTML = `<option value="">-- Choose Project --</option>` + projects.map(p => `
+        <option value="${p.id}" ${selId == p.id ? 'selected' : ''}>${p.title} (${p.track})</option>
+      `).join('');
+
+      renderEvaluations();
+      updateScores();
+    }
+
+    function renderEvaluations() {
+      const container = document.getElementById('evalHistory');
+      const allEvals = [];
+      projects.forEach(p => {
+        (p.evaluations || []).forEach(e => {
+          allEvals.push({ ...e, projectTitle: p.title });
+        });
+      });
+
+      if (!allEvals.length) {
+        container.innerHTML = `<div class="p-8 rounded-2xl bg-slate-900/50 text-center text-slate-400 text-sm">No defense evaluations recorded yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = allEvals.map(e => `
+        <div class="p-5 rounded-2xl bg-slate-900/80 space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <span class="text-xs font-mono text-slate-400">${e.evaluatorRole} • ${e.evaluatorName}</span>
+              <h4 class="text-sm font-bold text-white mt-1">${e.projectTitle}</h4>
+            </div>
+            <span class="font-display text-lg font-black text-emerald-400 font-mono">${e.totalScore}%</span>
+          </div>
+          <p class="text-xs text-slate-300 italic bg-slate-950 p-3 rounded-xl">"${e.comments}"</p>
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1">
+            <span>${new Date(e.evaluationDate).toLocaleDateString()}</span>
+            <span class="text-emerald-400">Certified • Passed</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateScores() {
+      const impl = parseFloat(document.getElementById('scoreImpl').value) || 0;
+      const pres = parseFloat(document.getElementById('scorePres').value) || 0;
+      const doc = parseFloat(document.getElementById('scoreDoc').value) || 0;
+      const innov = parseFloat(document.getElementById('scoreInnov').value) || 0;
+
+      document.getElementById('implVal').innerText = impl + " / 40";
+      document.getElementById('presVal').innerText = pres + " / 20";
+      document.getElementById('docVal').innerText = doc + " / 20";
+      document.getElementById('innovVal').innerText = innov + " / 20";
+
+      const total = (impl + pres + doc + innov).toFixed(1);
+      document.getElementById('totalScoreDisplay').innerText = total + " / 100";
+    }
+
+    async function handleEvaluationSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('evalSubmitBtn');
+      const alertBox = document.getElementById('evalAlert');
+      const projId = document.getElementById('evalProjectId').value;
+      if (!projId) {
+        alert("Please select a project.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Submitting Evaluation...";
+
+      const payload = {
+        projectId: parseInt(projId),
+        evaluatorName: document.getElementById('evaluatorName').value,
+        evaluatorRole: document.getElementById('evaluatorRole').value,
+        implementationScore: parseFloat(document.getElementById('scoreImpl').value),
+        presentationScore: parseFloat(document.getElementById('scorePres').value),
+        documentationScore: parseFloat(document.getElementById('scoreDoc').value),
+        innovationScore: parseFloat(document.getElementById('scoreInnov').value),
+        comments: document.getElementById('evalComments').value
+      };
+
+      try {
+        const res = await fetch('/api/evaluations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alertBox.classList.remove('hidden');
+          alertBox.innerText = "Evaluation certified & recorded successfully!";
+          setTimeout(() => { window.location.href = '/defense'; }, 800);
+        } else {
+          alert("Error recording evaluation.");
+          btn.disabled = false;
+          btn.innerText = "Submit Official Committee Evaluation";
+        }
+      } catch (err) {
+        alert("Network error.");
+        btn.disabled = false;
+        btn.innerText = "Submit Official Committee Evaluation";
+      }
+    }
+
+    initDefense();
+  </script>
+</body>
+</html>

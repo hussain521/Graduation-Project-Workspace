@@ -1,0 +1,188 @@
+@model List<AccountingERP.Models.UserViewModel>
+@{
+    ViewData["Title"] = "إدارة المستخدمين والصلاحيات";
+    var roles = ViewBag.Roles as List<AccountingERP.Models.ApplicationRole> ?? new List<AccountingERP.Models.ApplicationRole>();
+    var orgs = ViewBag.Organizations as List<AccountingERP.Models.Organization> ?? new List<AccountingERP.Models.Organization>();
+}
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-users-gear text-teal me-2"></i> إدارة المستخدمين وصلاحيات النظام</h3>
+        <p class="text-muted mb-0">إضافة مستخدمين جدد، تعيين الأدوار والصلاحيات، وإدارة إمكانية الوصول</p>
+    </div>
+    <button class="btn btn-primary-custom" onclick="openAddUserModal()">
+        <i class="fa-solid fa-user-plus me-1"></i> إضافة مستخدم جديد
+    </button>
+</div>
+
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table table-custom table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>اسم المستخدم</th>
+                    <th>الاسم الكامل</th>
+                    <th>البريد الإلكتروني / الجوال</th>
+                    <th>المؤسسة / المنشأة</th>
+                    <th>الدور / الصلاحية</th>
+                    <th>الحالة</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="fw-bold text-teal"><i class="fa-solid fa-user-circle me-1"></i> @user.Username</td>
+                        <td class="fw-bold">@user.FullName</td>
+                        <td>
+                            <div>@user.Email</div>
+                            <small class="text-muted">@user.Phone</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">@user.OrganizationName</span></td>
+                        <td>
+                            @if (user.IsAdmin)
+                            {
+                                <span class="badge bg-danger">مدير النظام</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@user.RoleName</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success">نشط</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary">موقوف</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger rounded-circle" onclick="deleteUser('@user.Id')" title="حذف">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Add User -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-teal text-white rounded-top-4" style="background-color: #0f766e;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2"></i> إضافة مستخدم جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="userForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اسم المستخدم <span class="text-danger">*</span></label>
+                        <input type="text" id="username" class="form-control" required placeholder="اسم المستخدم للتسجيل..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">كلمة المرور <span class="text-danger">*</span></label>
+                        <input type="password" id="password" class="form-control" required placeholder="كلمة المرور..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الاسم الكامل <span class="text-danger">*</span></label>
+                        <input type="text" id="fullName" class="form-control" required placeholder="الاسم الكامل..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">البريد الإلكتروني</label>
+                        <input type="email" id="email" class="form-control" placeholder="user@domain.com" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">رقم الجوال</label>
+                        <input type="text" id="phone" class="form-control" placeholder="05xxxxxxxx" />
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="isAdmin">
+                        <label class="form-check-label fw-bold ms-2" for="isAdmin">صلاحية مدير عام (Full Admin)</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary-custom px-4" onclick="saveUser()">حفظ المستخدم</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function getAntiforgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+
+        function openAddUserModal() {
+            $('#userForm')[0].reset();
+            var modal = new bootstrap.Modal(document.getElementById('userModal'));
+            modal.show();
+        }
+
+        function saveUser() {
+            var dto = {
+                Username: $('#username').val(),
+                Password: $('#password').val(),
+                FullName: $('#fullName').val(),
+                Email: $('#email').val(),
+                Phone: $('#phone').val(),
+                IsAdmin: $('#isAdmin').is(':checked'),
+                IsActive: true
+            };
+
+            $.ajax({
+                url: '/Users/Create',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                data: JSON.stringify(dto),
+                success: function(res) {
+                    Swal.fire('تم الإضافة', res.message, 'success').then(() => location.reload());
+                },
+                error: function(err) {
+                    var msg = err.responseJSON ? err.responseJSON.message : 'حدث خطأ أثناء إضافة المستخدم';
+                    Swal.fire('خطأ', msg, 'error');
+                }
+            });
+        }
+
+        function deleteUser(id) {
+            Swal.fire({
+                title: 'تأكيد الحذف',
+                text: 'هل أنت متأكد من حذف هذا المستخدم؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'احذف',
+                cancelButtonText: 'إلغاء'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    $.ajax({
+                        url: '/Users/Delete?id=' + id,
+                        type: 'POST',
+                        headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                        success: function(r) {
+                            Swal.fire('تم الحذف', r.message, 'success').then(() => location.reload());
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,252 @@
+@page
+@model GraduationProject.Pages.DefenseModel
+@{
+    ViewData["Title"] = "Defense Hearings & Evaluation Rubric";
+}
+
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                Defense Hearings & <span class="text-emerald-400">Scoring Rubric</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+                Standardized 100-point academic committee evaluation criteria
+            </p>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full">
+            <span>Minimum Passing Grade: 60/100</span>
+        </div>
+    </div>
+
+    <!-- Main 2-Column Interface -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left: Interactive Scoring Form (7 Cols) -->
+        <div class="lg:col-span-7 rounded-3xl bg-slate-900/90 p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between">
+                <h3 class="font-display text-xl font-bold text-white">Committee Scoring Form</h3>
+                <span class="text-xs font-mono text-slate-400">ABET Criteria Aligned</span>
+            </div>
+
+            <form id="evaluationForm" onsubmit="handleEvaluationSubmit(event)" class="space-y-6 text-sm">
+                <!-- Select Project -->
+                <div>
+                    <label class="block text-xs font-mono text-slate-300 uppercase mb-2">Graduation Project Under Review *</label>
+                    <select id="evalProjectId" required class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-400 outline-none text-sm font-medium">
+                        <option value="">-- Choose Project --</option>
+                        @foreach (var proj in Model.Projects)
+                        {
+                            <option value="@proj.Id" selected="@(Model.SelectedProjectId == proj.Id)">
+                                @proj.Title (@proj.Track.ToString()) - @(proj.Supervisor != null ? proj.Supervisor.FullName : "TBD")
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Evaluator Name & Role -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Evaluator / Examiner Name *</label>
+                        <input type="text" id="evaluatorName" required placeholder="e.g. Dr. Marcus Vance" value="Dr. Marcus Vance" class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Jury Role</label>
+                        <select id="evaluatorRole" class="w-full bg-slate-800 text-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none">
+                            <option value="Internal Examiner">Internal Examiner</option>
+                            <option value="External Examiner">External Examiner</option>
+                            <option value="Primary Supervisor">Primary Supervisor</option>
+                            <option value="Committee Chair">Committee Chair</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Rubric Sliders -->
+                <div class="space-y-4 pt-2">
+                    <h4 class="text-xs font-mono text-emerald-400 uppercase tracking-wider">Evaluation Dimensions (100 pts)</h4>
+
+                    <!-- 1. Implementation & Code Quality (40 pts) -->
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-white">1. Technical Implementation & Architecture (Max 40)</span>
+                            <span id="implVal" class="font-mono text-emerald-400 font-bold text-sm">36 / 40</span>
+                        </div>
+                        <input type="range" id="scoreImpl" min="0" max="40" step="0.5" value="36" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                        <p class="text-[11px] text-slate-400">Software correctness, robust architecture, test coverage, and execution.</p>
+                    </div>
+
+                    <!-- 2. Defense & Presentation (20 pts) -->
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-white">2. Presentation & Defense Q&A (Max 20)</span>
+                            <span id="presVal" class="font-mono text-emerald-400 font-bold text-sm">18 / 20</span>
+                        </div>
+                        <input type="range" id="scorePres" min="0" max="20" step="0.5" value="18" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                        <p class="text-[11px] text-slate-400">Clarity of delivery, slide professionalism, and mastery during jury questioning.</p>
+                    </div>
+
+                    <!-- 3. Documentation & Report (20 pts) -->
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-white">3. Final Thesis & Technical Documentation (Max 20)</span>
+                            <span id="docVal" class="font-mono text-emerald-400 font-bold text-sm">18.5 / 20</span>
+                        </div>
+                        <input type="range" id="scoreDoc" min="0" max="20" step="0.5" value="18.5" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                        <p class="text-[11px] text-slate-400">Report structure, literature review, citations, and system diagrams.</p>
+                    </div>
+
+                    <!-- 4. Innovation & Originality (20 pts) -->
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-white">4. Innovation & Practical Impact (Max 20)</span>
+                            <span id="innovVal" class="font-mono text-emerald-400 font-bold text-sm">19 / 20</span>
+                        </div>
+                        <input type="range" id="scoreInnov" min="0" max="20" step="0.5" value="19" oninput="updateScores()" class="w-full accent-emerald-500 cursor-pointer" />
+                        <p class="text-[11px] text-slate-400">Novelty of contribution, real-world utility, and creative problem solving.</p>
+                    </div>
+                </div>
+
+                <!-- Committee Comments -->
+                <div>
+                    <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Examiner Qualitative Remarks</label>
+                    <textarea id="evalComments" rows="3" placeholder="Provide actionable feedback and committee defense summary notes..." class="w-full bg-slate-800 text-slate-100 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-400 outline-none">Excellent defense delivery and thorough experimental validation.</textarea>
+                </div>
+
+                <!-- Live Score Calculator Box -->
+                <div class="p-5 rounded-2xl bg-emerald-950/40 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-emerald-400 uppercase">Calculated Grade</span>
+                        <div class="text-xs text-slate-300">Composite Jury Score</div>
+                    </div>
+                    <div class="text-right">
+                        <span id="totalScoreDisplay" class="font-display text-3xl font-black text-emerald-400 font-mono">91.5 / 100</span>
+                        <span class="block text-[11px] font-mono text-emerald-300">STATUS: DISTINCTION (PASS)</span>
+                    </div>
+                </div>
+
+                <div id="evalAlert" class="hidden p-3 rounded-xl bg-emerald-500/10 text-emerald-400 text-xs"></div>
+
+                <button type="submit" id="evalSubmitBtn" class="w-full py-3.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 active:scale-98 transition-all shadow-lg shadow-emerald-500/20 text-sm">
+                    Submit Official Committee Evaluation
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Recent Defense Log & Grading History (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white">Recent Defense Records</h3>
+                    <p class="text-xs text-slate-400">Certified evaluations from academic juries</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                @if (Model.RecentEvaluations.Any())
+                {
+                    @foreach (var eval in Model.RecentEvaluations)
+                    {
+                        <div class="p-5 rounded-2xl bg-slate-900/80 space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <span class="text-xs font-mono text-slate-400">@eval.EvaluatorRole &bull; @eval.EvaluatorName</span>
+                                    <h4 class="text-sm font-bold text-white mt-1">@eval.Project?.Title</h4>
+                                </div>
+                                <span class="font-display text-lg font-black text-emerald-400 font-mono">
+                                    @eval.TotalScore%
+                                </span>
+                            </div>
+
+                            <p class="text-xs text-slate-300 italic bg-slate-950 p-3 rounded-xl">
+                                "@eval.Comments"
+                            </p>
+
+                            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1">
+                                <span>@eval.EvaluationDate.ToString("MMM dd, yyyy")</span>
+                                <span class="text-emerald-400">Certified &bull; Passed</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="p-8 rounded-2xl bg-slate-900/50 text-center text-slate-400 text-sm">
+                        No defense evaluations recorded yet.
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function updateScores() {
+        const impl = parseFloat(document.getElementById('scoreImpl').value) || 0;
+        const pres = parseFloat(document.getElementById('scorePres').value) || 0;
+        const doc = parseFloat(document.getElementById('scoreDoc').value) || 0;
+        const innov = parseFloat(document.getElementById('scoreInnov').value) || 0;
+
+        document.getElementById('implVal').innerText = impl + " / 40";
+        document.getElementById('presVal').innerText = pres + " / 20";
+        document.getElementById('docVal').innerText = doc + " / 20";
+        document.getElementById('innovVal').innerText = innov + " / 20";
+
+        const total = (impl + pres + doc + innov).toFixed(1);
+        document.getElementById('totalScoreDisplay').innerText = total + " / 100";
+    }
+
+    async function handleEvaluationSubmit(e) {
+        e.preventDefault();
+        const btn = document.getElementById('evalSubmitBtn');
+        const alertBox = document.getElementById('evalAlert');
+
+        const projId = document.getElementById('evalProjectId').value;
+        if (!projId) {
+            alert("Please choose a project to evaluate.");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Submitting Evaluation...";
+
+        const payload = {
+            projectId: parseInt(projId),
+            evaluatorName: document.getElementById('evaluatorName').value,
+            evaluatorRole: document.getElementById('evaluatorRole').value,
+            implementationScore: parseFloat(document.getElementById('scoreImpl').value),
+            presentationScore: parseFloat(document.getElementById('scorePres').value),
+            documentationScore: parseFloat(document.getElementById('scoreDoc').value),
+            innovationScore: parseFloat(document.getElementById('scoreInnov').value),
+            comments: document.getElementById('evalComments').value
+        };
+
+        try {
+            const resp = await fetch('/api/Evaluations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                alertBox.classList.remove('hidden');
+                alertBox.innerText = "Evaluation submitted successfully! Refreshing...";
+                setTimeout(() => {
+                    window.location.href = '/Defense';
+                }, 1000);
+            } else {
+                alert("Failed to submit evaluation.");
+                btn.disabled = false;
+                btn.innerText = "Submit Official Committee Evaluation";
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Network error.");
+            btn.disabled = false;
+            btn.innerText = "Submit Official Committee Evaluation";
+        }
+    }
+</script>

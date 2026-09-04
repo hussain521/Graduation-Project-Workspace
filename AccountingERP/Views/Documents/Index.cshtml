@@ -1,0 +1,154 @@
+@model List<AccountingERP.Models.DocumentDto>
+@{
+    ViewData["Title"] = "إدارة القيود والسندات المحاسبية";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-file-invoice-dollar text-teal me-2"></i> إدارة القيود والسندات المحاسبية</h3>
+        <p class="text-muted mb-0">استعراض، إضافة، تعديل وترحيل قيود اليومية وسندات الصرف والقبض</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Create", "Documents", new { type = 1 })" class="btn btn-primary-custom">
+            <i class="fa-solid fa-plus me-1"></i> قيد يومية جديد
+        </a>
+        <a href="@Url.Action("Create", "Documents", new { type = 2 })" class="btn btn-outline-teal rounded-pill px-3">
+            <i class="fa-solid fa-minus-circle me-1"></i> سند صرف
+        </a>
+        <a href="@Url.Action("Create", "Documents", new { type = 3 })" class="btn btn-outline-success rounded-pill px-3">
+            <i class="fa-solid fa-plus-circle me-1"></i> سند قبض
+        </a>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table table-custom table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>نوع المستند</th>
+                    <th>رقم المستند</th>
+                    <th>تاريخ المستند</th>
+                    <th>المرجع</th>
+                    <th>البيان / الشرح</th>
+                    <th>إجمالي المبلغ</th>
+                    <th>الحالة</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">لا توجد مستندات محاسبية مسجلة</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var doc in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-teal">@doc.DocumentTypeTitle</td>
+                            <td><span class="badge bg-light text-dark border font-monospace fs-6">#@doc.DocumentNumber</span></td>
+                            <td>@doc.DocumentDateFormatted</td>
+                            <td><span class="text-muted small">@(string.IsNullOrEmpty(doc.ReferenceNumber) ? "-" : doc.ReferenceNumber)</span></td>
+                            <td>@doc.Notes</td>
+                            <td class="fw-bold text-dark font-monospace">@doc.TotalDebit.ToString("N2") ر.س</td>
+                            <td>
+                                @if (doc.Status == AccountingERP.Models.DocumentStatus.Posted)
+                                {
+                                    <span class="badge-status-posted"><i class="fa-solid fa-check me-1"></i> مرحل</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status-draft"><i class="fa-solid fa-clock me-1"></i> مسودة</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Edit", "Documents", new { id = doc.Id })" class="btn btn-sm btn-outline-secondary rounded-circle" title="استعراض / تعديل">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                @if (doc.Status == AccountingERP.Models.DocumentStatus.Draft)
+                                {
+                                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 ms-1" onclick="postDocument('@doc.Id')" title="ترحيل القيد">
+                                        <i class="fa-solid fa-check-double"></i> ترحيل
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle ms-1" onclick="deleteDocument('@doc.Id')" title="حذف">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-warning rounded-pill px-2 ms-1" onclick="unpostDocument('@doc.Id')" title="إلغاء الترحيل">
+                                        <i class="fa-solid fa-rotate-left"></i> إلغاء الترحيل
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function getAntiforgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+
+        function postDocument(id) {
+            $.ajax({
+                url: '/Documents/Post?id=' + id,
+                type: 'POST',
+                headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                success: function(res) {
+                    Swal.fire('تم الترحيل', res.message, 'success').then(() => location.reload());
+                },
+                error: function(err) {
+                    Swal.fire('خطأ', err.responseJSON ? err.responseJSON.message : 'تعذر ترحيل القيد', 'error');
+                }
+            });
+        }
+
+        function unpostDocument(id) {
+            $.ajax({
+                url: '/Documents/Unpost?id=' + id,
+                type: 'POST',
+                headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                success: function(res) {
+                    Swal.fire('تم إلغاء الترحيل', res.message, 'success').then(() => location.reload());
+                },
+                error: function(err) {
+                    Swal.fire('خطأ', err.responseJSON ? err.responseJSON.message : 'تعذر إلغاء الترحيل', 'error');
+                }
+            });
+        }
+
+        function deleteDocument(id) {
+            Swal.fire({
+                title: 'تأكيد الحذف',
+                text: 'هل أنت متأكد من حذف هذا القيد؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'احذف',
+                cancelButtonText: 'إلغاء'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    $.ajax({
+                        url: '/Documents/Delete?id=' + id,
+                        type: 'POST',
+                        headers: { 'RequestVerificationToken': getAntiforgeryToken() },
+                        success: function(r) {
+                            Swal.fire('تم الحذف', r.message, 'success').then(() => location.reload());
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

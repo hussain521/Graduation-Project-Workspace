@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Reflection;
 
+AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

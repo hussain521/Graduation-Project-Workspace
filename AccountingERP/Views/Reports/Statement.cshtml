@@ -1,0 +1,135 @@
+@model AccountingERP.Models.AccountStatementReportResultDto
+@{
+    ViewData["Title"] = "تقرير كشف الحساب التفصيلي";
+    var accounts = ViewBag.Accounts as List<AccountingERP.Models.AccountDto> ?? new List<AccountingERP.Models.AccountDto>();
+    var filter = ViewBag.Filter as AccountingERP.Models.AccountStatementFilterViewModel ?? new AccountingERP.Models.AccountStatementFilterViewModel();
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-book-open text-teal me-2"></i> تقرير كشف الحساب (حركة دفتر الأستاذ)</h3>
+        <p class="text-muted mb-0">استعراض كافة الحركات المالية المدينة والدائنة والرصيد التراكمي للحساب</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="fa-solid fa-print me-1"></i> طباعة التقرير
+    </button>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-custom mb-4">
+    <form method="get" asp-action="Statement" id="filterForm">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">اختر الحساب <span class="text-danger">*</span></label>
+                <select name="AccountId" class="form-select fw-bold text-teal" onchange="$('#filterForm').submit()">
+                    @foreach (var acc in accounts)
+                    {
+                        <option value="@acc.Id" selected="@(acc.Id == filter.AccountId)">@acc.Code - @acc.NameAr (@acc.AccountCategoryTitle)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">من تاريخ</label>
+                <input type="date" name="FromDate" class="form-control" value="@(filter.FromDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">إلى تاريخ</label>
+                <input type="date" name="ToDate" class="form-control" value="@(filter.ToDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="fa-solid fa-filter me-1"></i> عرض الكشف
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Account Info Summary Header -->
+<div class="card-custom bg-teal-50 border border-teal-subtle mb-4" style="background-color: #f0fdf4;">
+    <div class="row text-center text-md-start align-items-center">
+        <div class="col-md-4">
+            <span class="text-muted d-block small fw-bold">الحساب المحدد</span>
+            <h4 class="fw-bold text-teal mb-0">@Model.Account.Code - @Model.Account.NameAr</h4>
+        </div>
+        <div class="col-md-2">
+            <span class="text-muted d-block small fw-bold">الرصيد الافتتاحي</span>
+            <span class="fw-bold fs-5 text-dark font-monospace">@Model.OpeningBalance.ToString("N2") ر.س</span>
+        </div>
+        <div class="col-md-2">
+            <span class="text-muted d-block small fw-bold">إجمالي المدين</span>
+            <span class="fw-bold fs-5 money-debit">@Model.TotalDebit.ToString("N2") ر.س</span>
+        </div>
+        <div class="col-md-2">
+            <span class="text-muted d-block small fw-bold">إجمالي الدائن</span>
+            <span class="fw-bold fs-5 money-credit">@Model.TotalCredit.ToString("N2") ر.س</span>
+        </div>
+        <div class="col-md-2">
+            <span class="text-muted d-block small fw-bold">الرصيد النهائي</span>
+            <span class="fw-bold fs-5 text-teal font-monospace">@Model.ClosingBalance.ToString("N2") ر.س</span>
+        </div>
+    </div>
+</div>
+
+<!-- Statement Transactions Table -->
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table table-custom table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>تاريخ القيد</th>
+                    <th>نوع المستند</th>
+                    <th>رقم المستند</th>
+                    <th>المرجع</th>
+                    <th>البيان / تفاصيل الحركة</th>
+                    <th>مدين (Debit)</th>
+                    <th>دائن (Credit)</th>
+                    <th>الرصيد التراكمي</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Opening Balance Row -->
+                <tr class="table-light fw-bold">
+                    <td colspan="5" class="text-end text-muted">الرصيد الافتتاحي (حتى تاريخ بداية الكشف):</td>
+                    <td class="money-debit">@(Model.Account.IsDebitNature && Model.OpeningBalance > 0 ? Model.OpeningBalance.ToString("N2") : "0.00")</td>
+                    <td class="money-credit">@(!Model.Account.IsDebitNature && Model.OpeningBalance > 0 ? Model.OpeningBalance.ToString("N2") : "0.00")</td>
+                    <td class="font-monospace text-teal">@Model.OpeningBalance.ToString("N2") ر.س</td>
+                </tr>
+
+                @if (Model.Transactions.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">لا توجد حركات مالية مسجلة خلال الفترة المحددة</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var row in Model.Transactions)
+                    {
+                        <tr>
+                            <td>@row.DateFormatted</td>
+                            <td><span class="badge bg-light text-teal border fw-bold">@row.DocumentTypeTitle</span></td>
+                            <td><span class="badge bg-secondary-subtle text-dark font-monospace">#@row.DocumentNumber</span></td>
+                            <td><span class="text-muted small">@(string.IsNullOrEmpty(row.ReferenceNumber) ? "-" : row.ReferenceNumber)</span></td>
+                            <td>@row.Notes</td>
+                            <td class="money-debit">@(row.Debit > 0 ? row.Debit.ToString("N2") : "-")</td>
+                            <td class="money-credit">@(row.Credit > 0 ? row.Credit.ToString("N2") : "-")</td>
+                            <td class="fw-bold font-monospace text-teal">@row.Balance.ToString("N2") ر.س</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold bg-light fs-6">
+                    <td colspan="5" class="text-end">المجموع الكلي للحركات:</td>
+                    <td class="money-debit fs-5">@Model.TotalDebit.ToString("N2")</td>
+                    <td class="money-credit fs-5">@Model.TotalCredit.ToString("N2")</td>
+                    <td class="text-teal font-monospace fs-5">@Model.ClosingBalance.ToString("N2") ر.س</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

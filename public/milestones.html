@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#070b14] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Milestone Kanban Board | NexusGrad</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Cabinet Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="min-h-[100dvh] flex flex-col bg-[#070b14] text-slate-100 font-sans overflow-x-hidden">
+
+  <!-- Floating Pill Header -->
+  <div class="header-shell fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none" id="headerShell">
+    <header id="mainHeader" class="header-bar pointer-events-auto flex items-center justify-between w-full max-w-[1400px] px-6 py-4 bg-slate-900/90 backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform duration-200">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /></svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-display text-lg font-bold tracking-tight text-white flex items-center gap-1">
+              Nexus<span class="text-emerald-400 font-black">Grad</span>
+            </span>
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest hidden sm:inline">Workspace Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Dashboard</a>
+        <a href="/projects" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Projects</a>
+        <a href="/milestones" class="text-emerald-400 font-semibold whitespace-nowrap">Milestones</a>
+        <a href="/defense" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Defense & Rubric</a>
+        <a href="/supervisors" class="text-slate-300 hover:text-white transition-colors whitespace-nowrap">Supervisors</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="/api-docs" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          API Docs
+        </a>
+        <a href="/projects#submit" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-emerald-500 text-slate-950 hover:bg-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+          <span>Submit Project</span>
+        </a>
+      </div>
+    </header>
+  </div>
+
+  <main class="flex-1 w-full pt-28 pb-16">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
+
+      <div>
+        <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+          Deliverables & <span class="text-emerald-400">Milestone Board</span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-300 mt-1">
+          Real-time tracking of graduation project phases and submission milestones.
+        </p>
+      </div>
+
+      <!-- Kanban 3-Column Board -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Col 1: Pending -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+              <h3 class="font-display text-base font-bold text-white">Pending Phase</h3>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="countPending">0</span>
+          </div>
+          <div class="space-y-3" id="colPending"></div>
+        </div>
+
+        <!-- Col 2: In Progress -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <h3 class="font-display text-base font-bold text-white">In Progress & Review</h3>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400" id="countInProgress">0</span>
+          </div>
+          <div class="space-y-3" id="colInProgress"></div>
+        </div>
+
+        <!-- Col 3: Approved -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <h3 class="font-display text-base font-bold text-white">Certified Deliverables</h3>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400" id="countApproved">0</span>
+          </div>
+          <div class="space-y-3" id="colApproved"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/header.js"></script>
+  <script>
+    async function loadMilestones() {
+      try {
+        const projects = await fetch('/api/projects').then(r => r.json());
+        
+        const pending = [];
+        const inProgress = [];
+        const approved = [];
+
+        projects.forEach(p => {
+          (p.milestones || []).forEach(m => {
+            const item = { ...m, projectTitle: p.title, projectId: p.id, supervisorName: p.supervisor?.fullName || '' };
+            if (m.status === 'Approved') approved.push(item);
+            else if (m.status === 'InProgress' || m.status === 'Submitted') inProgress.push(item);
+            else pending.push(item);
+          });
+        });
+
+        document.getElementById('countPending').innerText = pending.length;
+        document.getElementById('countInProgress').innerText = inProgress.length;
+        document.getElementById('countApproved').innerText = approved.length;
+
+        document.getElementById('colPending').innerHTML = pending.map(m => `
+          <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono text-[10px] uppercase text-emerald-400">Weight: ${m.weightPercentage}%</span>
+              <span class="text-slate-400 font-mono text-[10px]">Due ${m.dueDate}</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">${m.title}</h4>
+            <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+              <span class="font-medium truncate max-w-[180px]">${m.projectTitle}</span>
+              <button onclick="changeStatus(${m.projectId}, ${m.id}, 'InProgress')" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 hover:bg-slate-700">Start &rarr;</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('colInProgress').innerHTML = inProgress.map(m => `
+          <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono text-[10px] uppercase text-amber-400">Weight: ${m.weightPercentage}%</span>
+              <span class="text-slate-400 font-mono text-[10px]">Due ${m.dueDate}</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">${m.title}</h4>
+            <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+              <span class="font-medium truncate max-w-[180px]">${m.projectTitle}</span>
+              <button onclick="changeStatus(${m.projectId}, ${m.id}, 'Approved')" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 hover:bg-emerald-900">Approve &check;</button>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('colApproved').innerHTML = approved.map(m => `
+          <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono text-[10px] uppercase text-emerald-400">Certified</span>
+              <span class="text-emerald-400 font-mono text-[10px]">Approved</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">${m.title}</h4>
+            ${m.feedback ? `<div class="text-[11px] text-emerald-300 bg-emerald-950/30 p-2 rounded-lg italic">"${m.feedback}"</div>` : ''}
+            <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+              <span class="font-medium truncate max-w-[180px]">${m.projectTitle}</span>
+              <span class="text-slate-400 font-mono text-[10px]">${m.supervisorName}</span>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function changeStatus(projId, msId, status) {
+      await fetch(`/api/projects/${projId}/milestones/${msId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadMilestones();
+    }
+
+    loadMilestones();
+  </script>
+</body>
+</html>

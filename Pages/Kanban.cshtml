@@ -1,0 +1,119 @@
+@page
+@model GraduationProject.Pages.KanbanModel
+@{
+    ViewData["Title"] = "Milestone Task Board";
+}
+
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                Deliverables & <span class="text-emerald-400">Milestone Board</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 mt-1">
+                Real-time tracking of graduation project phases and submission milestones.
+            </p>
+        </div>
+    </div>
+
+    <!-- Kanban 3-Column Board -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Column 1: Pending (Queued) -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                    <h3 class="font-display text-base font-bold text-white">Pending Phase</h3>
+                </div>
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">@Model.PendingMilestones.Count</span>
+            </div>
+
+            <div class="space-y-3">
+                @foreach (var item in Model.PendingMilestones)
+                {
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-mono text-[10px] uppercase text-emerald-400">Weight: @item.WeightPercentage%</span>
+                            <span class="text-slate-400 font-mono text-[10px]">Due @item.DueDate.ToString("MMM dd")</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white">@item.Title</h4>
+                        <p class="text-xs text-slate-400 line-clamp-2">@item.Description</p>
+                        <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+                            <span class="font-medium truncate max-w-[180px]">@item.Project?.Title</span>
+                            <span class="text-slate-400">@(item.Project?.Supervisor != null ? item.Project.Supervisor.FullName : "")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Column 2: In Progress / Review -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <h3 class="font-display text-base font-bold text-white">In Progress & Review</h3>
+                </div>
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">@Model.InProgressMilestones.Count</span>
+            </div>
+
+            <div class="space-y-3">
+                @foreach (var item in Model.InProgressMilestones)
+                {
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-mono text-[10px] uppercase text-amber-400">Weight: @item.WeightPercentage%</span>
+                            <span class="text-slate-400 font-mono text-[10px]">Due @item.DueDate.ToString("MMM dd")</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white">@item.Title</h4>
+                        <p class="text-xs text-slate-400 line-clamp-2">@item.Description</p>
+                        <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+                            <span class="font-medium truncate max-w-[180px]">@item.Project?.Title</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px] font-mono">Active</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Column 3: Approved & Defended -->
+        <div class="rounded-3xl bg-slate-900/90 p-5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <h3 class="font-display text-base font-bold text-white">Certified Deliverables</h3>
+                </div>
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">@Model.ApprovedMilestones.Count</span>
+            </div>
+
+            <div class="space-y-3">
+                @foreach (var item in Model.ApprovedMilestones)
+                {
+                    <div class="p-4 rounded-2xl bg-slate-950 space-y-2.5 hover:bg-slate-850 transition-colors">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-mono text-[10px] uppercase text-emerald-400">Completed</span>
+                            <span class="text-emerald-400 font-mono text-[10px]">Approved</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white">@item.Title</h4>
+                        <p class="text-xs text-slate-400 line-clamp-2">@item.Description</p>
+                        @if (!string.IsNullOrEmpty(item.Feedback))
+                        {
+                            <div class="text-[11px] text-emerald-300 bg-emerald-950/30 p-2 rounded-lg italic">
+                                "@item.Feedback"
+                            </div>
+                        }
+                        <div class="pt-2 text-[11px] text-slate-300 flex items-center justify-between">
+                            <span class="font-medium truncate max-w-[180px]">@item.Project?.Title</span>
+                            <span class="text-slate-400 font-mono text-[10px]">@(item.CompletedDate?.ToString("MMM dd") ?? "Done")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>

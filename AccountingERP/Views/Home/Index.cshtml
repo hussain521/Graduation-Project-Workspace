@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "لوحة التحكم المالية";
+    var recentDocs = ViewBag.RecentDocuments as System.Collections.Generic.List<AccountingERP.Models.DocumentDto> ?? new System.Collections.Generic.List<AccountingERP.Models.DocumentDto>();
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">لوحة التحكم والمؤشرات المالية</h3>
+        <p class="text-muted mb-0">مرحباً بك، ملخص مباشر للعمليات المحاسبية والحسابات</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Create", "Documents")" class="btn btn-primary-custom">
+            <i class="fa-solid fa-plus me-1"></i> إعداد قيد / سند جديد
+        </a>
+        <a href="@Url.Action("Statement", "Reports")" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fa-solid fa-print me-1"></i> كشف الحساب
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card-custom border-start border-4 border-teal">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold d-block mb-1">إجمالي الحسابات المالية</span>
+                    <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalAccounts</h2>
+                </div>
+                <div class="p-3 bg-teal-50 rounded-circle text-teal" style="background-color: #e6fffa; color: #0f766e;">
+                    <i class="fa-solid fa-sitemap fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom border-start border-4 border-info">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold d-block mb-1">إجمالي المستندات والقيود</span>
+                    <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalDocuments</h2>
+                </div>
+                <div class="p-3 bg-info-subtle rounded-circle text-info">
+                    <i class="fa-solid fa-file-invoice fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom border-start border-4 border-success">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold d-block mb-1">القيود المرحّلة</span>
+                    <h2 class="fw-bold text-success mb-0">@ViewBag.PostedDocuments</h2>
+                </div>
+                <div class="p-3 bg-success-subtle rounded-circle text-success">
+                    <i class="fa-solid fa-check-double fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom border-start border-4 border-warning">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold d-block mb-1">حسابات النقدية والسيولة</span>
+                    <h2 class="fw-bold text-warning mb-0">@ViewBag.CashAndBankCount</h2>
+                </div>
+                <div class="p-3 bg-warning-subtle rounded-circle text-warning">
+                    <i class="fa-solid fa-vault fa-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Documents Table -->
+<div class="card-custom">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0"><i class="fa-solid fa-history me-2 text-teal"></i> أحدث القيود والسندات المحاسبية</h5>
+        <a href="@Url.Action("Index", "Documents")" class="text-teal text-decoration-none fw-bold small">عرض كافة المستندات <i class="fa-solid fa-arrow-left"></i></a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom table-hover">
+            <thead>
+                <tr>
+                    <th>نوع المستند</th>
+                    <th>رقم القيد / السند</th>
+                    <th>التاريخ</th>
+                    <th>البيان / الشرح</th>
+                    <th>إجمالي المبلغ</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (recentDocs.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">لا توجد قيود مسجلة بعد</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var doc in recentDocs)
+                    {
+                        <tr>
+                            <td class="fw-bold text-teal">@doc.DocumentTypeTitle</td>
+                            <td><span class="badge bg-light text-dark border">#@doc.DocumentNumber</span></td>
+                            <td>@doc.DocumentDateFormatted</td>
+                            <td>@doc.Notes</td>
+                            <td class="fw-bold">@doc.TotalDebit.ToString("N2") ر.س</td>
+                            <td>
+                                @if (doc.Status == AccountingERP.Models.DocumentStatus.Posted)
+                                {
+                                    <span class="badge-status-posted"><i class="fa-solid fa-check me-1"></i> مرحل</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status-draft"><i class="fa-solid fa-clock me-1"></i> مسودة</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Edit", "Documents", new { id = doc.Id })" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                    <i class="fa-solid fa-eye"></i> استعراض
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

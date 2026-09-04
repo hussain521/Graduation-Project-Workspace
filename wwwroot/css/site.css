@@ -1,0 +1,67 @@
+:root {
+  --header-transition: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Rule 8 Scroll-reactive Floating Pill Header Transitions */
+.header-shell {
+  padding-top: 0px;
+  transition: padding-top var(--header-transition);
+}
+
+.header-shell.is-compact-shell {
+  padding-top: 14px;
+}
+
+.header-bar {
+  border-radius: 0px;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: width var(--header-transition),
+              max-width var(--header-transition),
+              border-radius var(--header-transition),
+              background-color var(--header-transition),
+              box-shadow var(--header-transition),
+              padding var(--header-transition);
+}
+
+.header-bar.is-compact {
+  width: fit-content;
+  max-width: calc(100vw - 32px);
+  border-radius: 9999px;
+  background-color: rgba(13, 19, 34, 0.85);
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.7);
+  padding: 8px 24px;
+  backdrop-filter: blur(16px);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070b14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Glow effects and animation utilities */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+.glow-emerald {
+  box-shadow: 0 0 50px -10px rgba(16, 185, 129, 0.15);
+}
