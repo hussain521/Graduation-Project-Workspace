@@ -1,0 +1,406 @@
+﻿@model User
+
+@{
+    ViewData["Title"] = "تسجيل المشترك";
+}
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --accent-color: #4cc9f0;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        background-color: #f5f7ff;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .registration-card {
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: none;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--accent-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: var(--border-radius);
+        padding: 0.75rem 1rem;
+        border: 1px solid #e0e0e0;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+    }    
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.75rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    .toggle-password {
+        border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+        border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+    }
+
+    .logo-preview {
+        width: 150px;
+        height: 150px;
+        border: 2px dashed #ddd;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin: 0 auto;
+        background-color: #f8f9fa;
+    }
+
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+    .header-type-option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .header-type-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .header-type-option input[type="radio"] {
+            margin-left: 10px;
+        }
+
+    .header-preview {
+        text-align: center;
+        padding: 1rem;
+        margin-top: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--border-radius);
+        background-color: white;
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="registration-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-building me-2"></i> تسجيل المشترك</h3>
+                </div>
+                <div class="card-body">
+                    <form id="registerForm" action="Register" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        @Html.AntiForgeryToken()
+
+                        <!-- معلومات الحساب الأساسية -->
+                        <div class="form-section">
+                            <h4 class="section-title"><i class="fas fa-user-circle me-2"></i>معلومات الحساب</h4>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Email" class="form-label">البريد الإلكتروني</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input asp-for="Email" type="email" class="form-control" placeholder="أدخل بريدك الإلكتروني" autocomplete="username" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Organization.Name" class="form-label">اسم المشترك</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-store"></i></span>
+                                        <input asp-for="Organization.Name" type="text" class="form-control" placeholder="اسم المشترك" maxlength="50" />
+                                    </div>
+                                    <span asp-validation-for="Organization.Name" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Password" class="form-label">كلمة المرور</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input asp-for="Password" type="password" class="form-control" placeholder="كلمة المرور" autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label">تأكيد كلمة المرور</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="تأكيد كلمة المرور" autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات المشترك -->
+                        @*<div class="form-section">
+                            <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>معلومات المشترك</h4>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Organization.Emails" class="form-label">البريد الإلكتروني للمشترك</label>
+                                    <input asp-for="Organization.Emails" type="text" class="form-control" placeholder="البريد الإلكتروني للمشترك" maxlength="250" />
+                                    <small class="text-muted">يمكن إضافة أكثر من بريد مفصولة بفاصلة</small>
+                                </div>                                
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">شعار المشترك</label>
+                                    <input type="file" name="logoFile" class="form-control" accept="image/*" />
+                                    <input type="hidden" asp-for="LogoPath" />
+                                    <div class="logo-preview mt-2">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">تاريخ الإضافة</label>
+                                    <input asp-for="AddDate" type="date" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>*@
+
+                        <!-- تنسيق الترويسة -->
+                        <div class="form-section">
+                            <h4 class="section-title"><i class="fas fa-heading me-2"></i>تنسيق الترويسة</h4>
+
+                            @*<div class="mb-4">
+                                <label class="form-label">نوع الترويسة</label>
+                                <div class="header-type-option">
+                                    <input type="radio" asp-for="HeaderTypled" value="1" id="headerType1" checked />
+                                    <label for="headerType1" class="ms-2">نموذج 1 (شعار على اليمين)</label>
+                                </div>
+                                <div class="header-type-option">
+                                    <input type="radio" asp-for="HeaderTypled" value="2" id="headerType2" />
+                                    <label for="headerType2" class="ms-2">نموذج 2 (شعار على اليسار)</label>
+                                </div>
+                                <div class="header-type-option">
+                                    <input type="radio" asp-for="HeaderTypled" value="3" id="headerType3" />
+                                    <label for="headerType3" class="ms-2">نموذج 3 (شعار في المنتصف)</label>
+                                </div>
+                            </div>*@
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="text-center mb-3">معلومات الجانب الأيمن</h5>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblRightLine1" class="form-label">السطر الأول</label>
+                                        <input asp-for="Organization.LblRightLine1" type="text" class="form-control" placeholder="السطر الأول" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblRightLine2" class="form-label">السطر الثاني</label>
+                                        <input asp-for="Organization.LblRightLine2" type="text" class="form-control" placeholder="السطر الثاني" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblRightLine3" class="form-label">السطر الثالث</label>
+                                        <input asp-for="Organization.LblRightLine3" type="text" class="form-control" placeholder="السطر الثالث" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblRightLine4" class="form-label">السطر الرابع</label>
+                                        <input asp-for="Organization.LblRightLine4" type="text" class="form-control" placeholder="السطر الرابع" maxlength="100" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="text-center mb-3">معلومات الجانب الأيسر</h5>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblLeftLine1" class="form-label">السطر الأول</label>
+                                        <input asp-for="Organization.LblLeftLine1" type="text" class="form-control" placeholder="السطر الأول" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblLeftLine2" class="form-label">السطر الثاني</label>
+                                        <input asp-for="Organization.LblLeftLine2" type="text" class="form-control" placeholder="السطر الثاني" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblLeftLine3" class="form-label">السطر الثالث</label>
+                                        <input asp-for="Organization.LblLeftLine3" type="text" class="form-control" placeholder="السطر الثالث" maxlength="100" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Organization.LblLeftLine4" class="form-label">السطر الرابع</label>
+                                        <input asp-for="Organization.LblLeftLine4" type="text" class="form-control" placeholder="السطر الرابع" maxlength="100" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="header-preview">
+                                <h5>معاينة الترويسة</h5>
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                    <div class="text-start">
+                                        <div class="fw-bold">السطر الأيمن 1</div>
+                                        <div>السطر الأيمن 2</div>
+                                        <div>السطر الأيمن 3</div>
+                                        <div>السطر الأيمن 4</div>
+                                    </div>
+                                    <div class="logo-placeholder bg-light p-2 rounded">
+                                        <i class="fas fa-image fa-2x"></i>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">السطر الأيسر 1</div>
+                                        <div>السطر الأيسر 2</div>
+                                        <div>السطر الأيسر 3</div>
+                                        <div>السطر الأيسر 4</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار التفعيل -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary py-3">
+                                <i class="fas fa-save me-2"></i>حفظ وتفعيل الحساب
+                            </button>
+                            <a href="/Users/Login" class="btn btn-outline-primary py-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>لديك حساب بالفعل؟ تسجيل الدخول
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle password visibility
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            if (toggleButtons) {
+                toggleButtons.forEach(function (button) {
+                    if (button && button.addEventListener) {
+                        button.addEventListener('click', function () {
+                            const passwordInput = this.parentElement ? this.parentElement.querySelector('input') : null;
+                            const icon = this.querySelector ? this.querySelector('i') : null;
+
+                            if (passwordInput && icon) {
+                                if (passwordInput.type === 'password') {
+                                    passwordInput.type = 'text';
+                                    icon.classList.remove('fa-eye');
+                                    icon.classList.add('fa-eye-slash');
+                                } else {
+                                    passwordInput.type = 'password';
+                                    icon.classList.remove('fa-eye-slash');
+                                    icon.classList.add('fa-eye');
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Logo preview
+            const logoFileInput = document.querySelector('input[name="logoFile"]');
+            const logoPreview = document.querySelector('.logo-preview');
+
+            if (logoFileInput && logoFileInput.addEventListener) {
+                logoFileInput.addEventListener('change', function (e) {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            if (logoPreview) {
+                                logoPreview.innerHTML = `<img src="${e.target.result}" alt="Logo Preview">`;
+                            }
+                        }
+
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+            }
+
+            // Initialize date field
+            const addDateElem = document.getElementById('AddDate');
+            if (addDateElem) {
+                const today = new Date().toISOString().split('T')[0];
+                addDateElem.value = today;
+            }
+        });
+    </script>
+}

@@ -1,0 +1,288 @@
+﻿@{
+    ViewData["Title"] = "شاشة الاشعارات";
+}
+
+<input type="hidden" id="Operation" />
+<input type="hidden" id="TypeId" value="1" />
+<div class="container-fluid p-0">
+    <div class="card border-0 shadow-none">
+        <div class="card-header bg-light py-2">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">اشعار مدين</h5>
+                </div>
+            </div>
+        </div>
+        <div id="ToolsPnl">
+            <div class="card-body p-2">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">رقم الاشعار</label>
+                        <input type="text" class="form-control form-control-sm" id="SerialNum" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">التاريخ</label>
+                        <input type="date" class="form-control form-control-sm" id="DocumentDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">الحساب</label>
+                        <select class="form-select form-select-sm" id="AccountId">
+                            <option value="">اختر الحساب</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">العملة</label>
+                        <select class="form-select form-select-sm" id="CurrencyId">
+                            <option value="">اختر العملة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- جدول الأصناف -->
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-sm" id="itemsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="40%">اسم الصنف</th>
+                                <th width="20%">العدد</th>
+                                <th width="20%">السعر</th>
+                                <th width="20%">الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- سيتم تحميل البيانات هنا عبر JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <td colspan="3" class="text-end"><strong>الإجمالي النهائي:</strong></td>
+                                <td><input type="text" class="form-control form-control-sm" id="finalTotal" readonly></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label">البيان</label>
+                        <textarea class="form-control form-control-sm" id="Description" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-sm btn-secondary executeBtn" id="btnAdd" onclick="addDocument()">اضافة</button>
+                        <button class="btn btn-sm btn-secondary executeBtn" id="btnSearch" onclick="findDocument()">بحث</button>
+                        <button class="btn btn-sm btn-warning executeBtn" id="btnEdit" onclick="editDocument()">تعديل</button>
+                        <button class="btn btn-sm btn-success executeBtn" id="btnSave">حفظ</button>
+                        <button class="btn btn-sm btn-danger executeBtn" id="btnReset" onclick="resetDocument()">تراجع</button>
+                        <button class="btn btn-sm btn-dark executeBtn" id="btnPrint" onclick="printDocument()">طباعة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // تحميل العملات
+        function loadCurrencies() {
+            $.ajax({
+                url: '/Currencies/GetList',
+                type: 'GET',
+                success: function (response) {
+                    var options = '<option value="">اختر العملة</option>';
+                    $.each(response.Data, function (index, currency) {
+                        options += `<option value="${currency.Id}">${currency.Name} (${currency.Symbol})</option>`;
+                    });
+                    $('#CurrencyId').html(options);
+                }
+            });
+        }
+
+        // تحميل الحسابات
+        function loadAccounts() {
+            $.ajax({
+                url: '/Accounts/GetList',
+                type: 'GET',
+                success: function (response) {
+                    var options = '<option value="">اختر الحساب</option>';
+                    $.each(response.Data, function (index, account) {
+                        options += `<option value="${account.Id}">${account.Name}</option>`;
+                    });
+                    $('#AccountId').html(options);
+                }
+            });
+        }
+
+        // تحميل الأصناف
+        function loadItems() {
+            $.ajax({
+                url: '/Items/GetList',
+                type: 'GET',
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        renderItemsTable(response.Data);
+                    }
+                }
+            });
+        }
+
+        // عرض الأصناف في الجدول
+        function renderItemsTable(items) {
+            var rows = '';
+            var id = 1;
+            $.each(items, function (index, item) {
+                rows += `
+                        <tr id='row${id}' data-id="${item.Id}">
+                            <td>${item.Name}</td>
+                            <td><input type="number" class="form-control form-control-sm quantity" min="1" id='item${id}Quantity'></td>
+                            <td><input type="number" class="form-control form-control-sm price" value="${item.Price?.toFixed(2) || '0.00'}" step="0.01" id='item${id}Price'></td>
+                            <td><input type="text" class="form-control form-control-sm total" value="${item.Price?.toFixed(2) || '0.00'}" readonly id='item${id}Total'></td>
+                        </tr>`;
+            });
+            $('#itemsTable tbody').html(rows);
+            attachItemsEvents();
+        }
+
+        // إرفاق الأحداث لعناصر الجدول
+        function attachItemsEvents() {
+            $('.quantity, .price').on('input', function () {
+                const row = $(this).closest('tr');
+                calculateRowTotal(row);
+                calculateFinalTotal();
+            });
+        }
+
+        // حساب إجمالي الصف
+        function calculateRowTotal(row) {
+            const quantity = parseFloat(row.find('.quantity').val()) || 0;
+            const price = parseFloat(row.find('.price').val()) || 0;
+            const total = (quantity * price).toFixed(2) || 0;
+            row.find('.total').val(total);
+        }
+
+        // حساب الإجمالي النهائي
+        function calculateFinalTotal() {
+            let finalTotal = 0;
+            $('#itemsTable tbody tr').each(function () {
+                const quantity = parseFloat($(this).find('.quantity').val()) || 0;
+                const price = parseFloat($(this).find('.price').val()) || 0;
+                const total = (quantity * price).toFixed(2);
+                finalTotal += parseFloat(total);
+            });
+            $('#finalTotal').val(finalTotal.toFixed(2));
+        }
+
+        // حفظ الاشعار
+        $('#btnSave').click(function () {
+            const documentData = {
+                SerialNum: parseInt($('#SerialNum').val()) || 0,
+                DocumentDate: $('#DocumentDate').val(),
+                AccountId: $('#AccountId').val(),
+                CurrencyId: $('#CurrencyId').val(),
+                Description: $('#Description').val(),
+                Item1Quantity: 0,
+                Item1Price: 0,
+                Item2Quantity: 0,
+                Item2Price: 0,
+                Item3Quantity: 0,
+                Item3Price: 0,
+                //Items: getSelectedItems()
+            };
+
+            if ($("#row1").length > 0) {
+                documentData.Item1Quantity = parseFloat($("#item1Quantity").val()) || 0;
+                documentData.Item1Price = parseFloat($("#item1Price").val()) || 0;
+            }
+
+            if ($("#row2").length > 0) {
+                documentData.Item2Quantity = parseFloat($("#item2Quantity").val()) || 0;
+                documentData.Item2Price = parseFloat($("#item2Price").val()) || 0;
+            }
+
+            if ($("#row3").length > 0) {
+                documentData.Item3Quantity = parseFloat($("#item3Quantity").val()) || 0;
+                documentData.Item3Price = parseFloat($("#item3Price").val()) || 0;
+            }
+            // هنا يمكنك إرسال البيانات إلى الخادم
+            var id = $('#Id').val();
+            var url = id ? '/Documents/Update' : '/Documents/Add';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                //contentType: 'application/json',
+                data: documentData,// JSON.stringify(documentData),
+                success: function (response) {
+                    console.log(response);
+                    if (response.IsSuccess) {
+                        showSuccess(response.Message || 'تم حفظ الإشعار بنجاح');
+                        clearTools();
+                    } else {
+                        var errMsg = (response.Error && response.Error.Messages && response.Error.Messages.length > 0)
+                            ? response.Error.Messages.join('<br>')
+                            : (response.Message || 'فشل حفظ الإشعار');
+                        showError(errMsg);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showError('حدث خطأ أثناء حفظ الإشعار');
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // تحميل البيانات عند بدء الصفحة
+        $(document).ready(function () {
+            refreshDocumentSerialNum();
+            loadCurrencies();
+            loadAccounts();
+            loadItems();
+            resetDocument();
+        });
+
+        function refreshDocumentSerialNum() {
+            $.post("/Documents/RefreshSerialNum", { 'TypeId': $("#TypeId").val()},
+                function (response) {
+                    $("#SerialNum").val(response.Data.SerialNum);
+                });
+        }
+
+        function clearTools() {
+            $("#Id").val(null)
+            $("#SerialNum").val(null);
+            $("#AccountId").val(null);
+            $("#CurrencyId").val(null);
+
+            //$("#Amount").val(null);
+
+            //$("#CurrencyId").val($("#DefaultCurrencyId").val());
+            //$("#CurrencyVal").val(1);
+
+            setReadOnly("#ToolsPnl", true);
+            $('#ToolsPnl').css('background-color', 'azure')
+        }
+
+        function resetDocument() {
+            setEnabled(".executeBtn", false);
+            clearTools();
+            setEnabled("#btnReset", true);
+            setEnabled("#btnAdd", isInRole("@Shared.Constant.Roles.Documents.Add"));
+            setEnabled("#btnSearch",isInRole("@Shared.Constant.Roles.Documents.Page"));
+            setEnabled("#btnPrint", isInRole("@Shared.Constant.Roles.Documents.Page"));
+        }
+
+        function addDocument() {
+            clearTools();
+            setEnabled(".executeBtn", false);
+            setEnabled("#btnSave", true);
+            setEnabled("#btnReset", true);
+            setReadOnly("#ToolsPnl", false);
+            $("#Operation").val("Add");
+            //setDataGridEditable(true);
+            refreshDocumentSerialNum();
+        }
+    </script>
+}

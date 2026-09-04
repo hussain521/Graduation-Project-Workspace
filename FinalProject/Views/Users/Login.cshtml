@@ -1,0 +1,333 @@
+﻿@model User
+
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+}
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --accent-color: #4cc9f0;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        background-color: #f5f7ff;
+        font-family: 'Tajawal', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .login-card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        background-color: white;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem;
+    }
+
+    .card-body {
+        padding: 1.2rem;
+    }
+
+    .login-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .login-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+        color: var(--dark-color);
+    }
+
+    .login-subtitle {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+        display: block;
+        text-align: right;
+    }
+
+    .input-group {
+        direction: ltr;
+    }
+
+    .input-group-text {
+        background-color: var(--light-color);
+        border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+        border-left: none !important;
+    }
+
+    .form-control {
+        border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+        border-right: none !important;
+        padding: 0.5rem 0.75rem;
+        text-align: right;
+        direction: rtl;
+        font-size: 0.95rem;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+            border-color: var(--primary-color);
+        }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        transition: all 0.3s;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    .forgot-password {
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .divider {
+        position: relative;
+        text-align: center;
+        margin: 1rem auto;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .divider::before {
+            right: 0;
+        }
+
+        .divider::after {
+            left: 0;
+        }
+
+    .text-danger {
+        font-size: 0.8rem;
+        text-align: right;
+        display: block;
+    }
+
+    .form-check {
+        text-align: right;
+        font-size: 0.9rem;
+    }
+
+    .form-check-input {
+        margin-left: 0.3rem;
+    }
+
+    .centered-form {
+        max-width: 400px;
+        margin: 0 auto;
+        margin-bottom: 1rem;
+    }
+
+    /* تحسين للشاشات الصغيرة */
+    @@media (max-width: 480px) {
+        .login-icon {
+            font-size: 3rem;
+        }
+
+        .login-title {
+            font-size: 1.3rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.85rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .form-control {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary, .btn-outline-primary {
+            font-size: 0.95rem;
+            padding: 0.5rem;
+        }
+
+        .divider {
+            margin: 0.8rem auto;
+        }
+    }
+
+    .footer{
+        display:none;
+    }
+</style>
+<div class="d-none d-sm-block" style="height: 30px;"></div>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="card-header d-none d-sm-block">
+            <h3><i class="fas fa-sign-in-alt me-2"></i>نظام المحاسبة السحابي</h3>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-circle login-icon"></i>
+                <h2 class="login-title">مرحباً بعودتك</h2>
+                <p class="login-subtitle">سجل الدخول للوصول إلى حسابك</p>
+            </div>
+
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <!-- Email Input -->
+                <div class="mb-4 centered-form">
+                    <label asp-for="Email" class="form-label">البريد الإلكتروني</label>
+                    <div class="input-group">
+                        <input asp-for="Email" type="email" class="form-control" placeholder="أدخل بريدك الإلكتروني" autocomplete="username" />
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-4 centered-form">
+                    <label asp-for="Password" class="form-label">كلمة المرور</label>
+                    <div class="input-group">
+                        <input asp-for="Password" type="password" class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password" />
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        @*<button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>*@
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="d-flex justify-content-between align-items-center mb-4 centered-form">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" />
+                        <label class="form-check-label" for="rememberMe">تذكرني</label>
+                    </div>
+                    <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
+                </div>
+
+                <!-- Login Button -->
+                <button id="login-submit" type="submit" class="btn btn-primary mb-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول
+                </button>
+
+                <!-- Divider -->
+                <div class="divider">أو</div>
+
+                <!-- Register Link -->
+                <a href="/Users/Register" class="btn btn-outline-primary">
+                    <i class="fas fa-user-plus me-2"></i>إنشاء حساب جديد
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Toggle password visibility
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        if (toggleButtons) {
+            toggleButtons.forEach(function (button) {
+                if (button) {
+                    button.addEventListener('click', function () {
+                        const passwordInput = this.parentElement ? this.parentElement.querySelector('input') : null;
+                        const icon = this.querySelector ? this.querySelector('i') : null;
+
+                        if (passwordInput && icon) {
+                            if (passwordInput.type === 'password') {
+                                passwordInput.type = 'text';
+                                icon.classList.remove('fa-eye');
+                                icon.classList.add('fa-eye-slash');
+                            } else {
+                                passwordInput.type = 'password';
+                                icon.classList.remove('fa-eye-slash');
+                                icon.classList.add('fa-eye');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Add animation on load
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginCard = document.querySelector('.login-card');
+            if (loginCard) {
+                loginCard.style.opacity = '0';
+                loginCard.style.transform = 'translateY(20px)';
+                loginCard.style.transition = 'all 0.5s ease';
+
+                setTimeout(function () {
+                    loginCard.style.opacity = '1';
+                    loginCard.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        });
+    </script>
+}

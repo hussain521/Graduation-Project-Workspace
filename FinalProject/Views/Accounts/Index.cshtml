@@ -1,0 +1,222 @@
+﻿@{
+    ViewData["Title"] = "إدارة الحسابات";
+}
+
+<div class="container mt-5 pt-4">
+    <h2 class="text-center">إدارة الحسابات</h2>
+
+    <div class="row align-items-center mb-3">
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" id="createNewAccount">إضافة حساب جديد</button>
+        </div>
+        <div class="col-md-9">
+            <input id="ListInput" class="form-control" type="text" placeholder="ابحث هنا">
+        </div>
+    </div>
+
+    <table class="table table-bordered mt-3" id="ListTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>تاريخ الاضافة</th>
+                <th>المستخدم</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تحميل البيانات هنا عبر AJAX -->
+        </tbody>
+    </table>
+</div>
+
+<!-- نافذة إضافة/تعديل الحساب -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accountModalLabel">إضافة حساب جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm">
+                    <input type="hidden" id="AccountId" />
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">الاسم</label>
+                        <input type="text" class="form-control" id="Name" required />
+                    </div>
+
+                    @* <div class="modal-body">
+                            <div class="row">
+                                <div class="alert alert-danger" id="erorrdiv" style="display:none">
+                                    <span id="erorrspan">
+                                        يجب ادخال الاسم
+                                    </span>
+                                </div>
+                            </div>
+                        </div> *@
+
+                    <div class="mb-3">
+                        <label for="CategoryId" class="form-label">النوع</label>
+                        <select class="form-control" id="CategoryId" required>
+                            <option value="-1" disabled>-- اختر نوع الحساب -- </option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="IsActive" class="form-label">الحالة</label>
+                        <select class="form-control" id="IsActive" required>
+                            <option value="true">نشط</option>
+                            <option value="false">غير نشط</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveAccount">حفظ</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadCategories();
+            loadAccounts();
+
+            $(document).ready(function () {
+                $("#ListInput").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#ListTable .tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+
+            function loadCategories() {
+                $.ajax({
+                    url: '/Categories/GetList',
+                    type: 'GET',
+                    success: function (response) {
+                        var s = '<option value="-1" disabled selected>-- اختر نوع الحساب --</option>';
+                        var rows = '';
+                        $("#CategoryId").html('');
+                        $.each(response.Data, function (index, category) {                            
+                            s += '<option value="' + category.Id + '">' + category.Name + '</option>';
+                        });
+                        //$('#ListTable tbody').html(rows);
+                        $("#CategoryId").append(s);
+                    }
+                });
+            }
+
+            // تحميل الحسابات من الخادم
+            function loadAccounts() {
+                $.ajax({
+                    url: '/Accounts/GetAll',
+                    type: 'GET',
+                    success: function (response) {
+                        var rows = '';
+                        $.each(response.Data, function (index, account) {
+                            rows += `<tr class="tr">
+                                    <td>${account.Name}</td>
+                                    <td>${account.Category.Name}</td>
+                                    <td>${account.IsActive ? 'نشط' : 'غير نشط'}</td>
+                                    <td>${new Date(account.AddDate).toLocaleDateString()}</td>
+                                    <td>${account.User?.UserName ?? ''}</td>
+                                    <td>
+                                        <button class="btn btn-warning editAccount" data-id="${account.Id}">تعديل</button>
+                                        <button class="btn btn-danger deleteAccount" data-id="${account.Id}">حذف</button>
+                                    </td>
+                                </tr>`;
+                        });
+                        $('#ListTable tbody').html(rows);
+                    }
+                });
+            }
+
+            // عرض نافذة إضافة حساب جديد
+            $('#createNewAccount').click(function () {
+                $('#accountModal').modal('show');
+                $('#accountModalLabel').text('إضافة حساب جديد');
+                $('#accountForm')[0].reset();
+                $('#AccountId').val('');
+            });
+
+            // حفظ الحساب (إضافة أو تعديل)
+            $('#saveAccount').click(function () {
+                var id = $('#AccountId').val();
+                var url = id ? '/Accounts/Update' : '/Accounts/Add';
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        Id: id,
+                        Name: $('#Name').val(),
+                        CategoryId: $('#CategoryId').val(),
+                        IsActive: $('#IsActive').val() === 'true'
+                    },
+                    success: function (response) {
+                        if (response && response.IsSuccess) {
+                            $('#accountModal').modal('hide');
+                            $('#accountForm')[0].reset();
+                            $('#AccountId').val('');
+                            loadAccounts();
+                            showSuccess(response.Message || 'تم حفظ الحساب بنجاح');
+                        } else {
+                            var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && response.Message) || 'لم تكتمل عملية الحفظ';
+                            showError(msg);
+                        }
+                    },
+                    error: function () {
+                        showError('حدث خطأ أثناء الاتصال بالخادم');
+                    }
+                });
+            });
+
+            // تعديل الحساب
+            $(document).on('click', '.editAccount', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: `/Accounts/FindById/${id}`,
+                    type: 'GET',
+                    success: function (account) {
+                        $('#accountModal').modal('show');
+                        $('#accountModalLabel').text('تعديل الحساب');
+                        $('#AccountId').val(account.Data.Id);
+                        $('#Name').val(account.Data.Name);
+                        $('#CategoryId').val(account.Data.CategoryId);
+                        $('#IsActive').val(account.Data.IsActive.toString());
+                    }
+                });
+            });
+
+            // حذف الحساب
+            $(document).on('click', '.deleteAccount', function () {
+                var id = $(this).data('id');
+                confirmAction('تأكيد الحذف', 'هل أنت متأكد أنك تريد حذف هذا الحساب؟', 'نعم، احذف', function () {
+                    $.ajax({
+                        url: '/Accounts/Delete',
+                        type: 'POST',
+                        data: { Id: id },
+                        success: function (data) {
+                            if (data && data.IsSuccess) {
+                                loadAccounts();
+                                showSuccess(data.Message || 'تم حذف الحساب بنجاح');
+                            } else {
+                                var msg = (data && data.Error && data.Error.Messages && data.Error.Messages[0]) || (data && data.Message) || 'لم يتم حذف الحساب';
+                                showError(msg);
+                            }
+                        },
+                        error: function () {
+                            showError('حدث خطأ أثناء الاتصال بالخادم');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

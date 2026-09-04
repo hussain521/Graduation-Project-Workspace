@@ -1,0 +1,183 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@{
+    ViewData["Title"] = "كشف الحساب";
+}
+
+<div class="container-fluid p-0">
+    <div class="card border-0 shadow-none">
+        <div class="card-header bg-light py-2">
+            <h5 class="mb-0">كشف الحساب</h5>
+        </div>
+
+        <div class="card-body p-2">
+
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">الحساب</label>
+                    <select class="form-select form-select-sm" id="AccountId">
+                        <option value="">اختر الحساب</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">العملة</label>
+                    <select class="form-select form-select-sm" id="CurrencyId">
+                        <option value="">اختر العملة</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">من تاريخ</label>
+                    <input type="date" class="form-control form-control-sm" id="StartDate">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">إلى تاريخ</label>
+                    <input type="date" class="form-control form-control-sm" id="EndDate">
+                </div>
+
+            </div>
+
+
+            <div class="text-center mb-3">
+                <button class="btn btn-sm btn-primary" onclick="getAccountStatement()">
+                    بحث
+                </button>
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-sm">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البيان</th>
+                            <th>مدين</th>
+                            <th>دائن</th>
+                            <th>الرصيد</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="statementBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+            loadAccounts();
+            loadCurrencies();
+        });
+
+
+        // تحميل الحسابات
+        function loadAccounts() {
+
+            $.ajax({
+                url: '/Accounts/GetList',
+                type: 'GET',
+                success: function (response) {
+
+                    var options = '<option value="">اختر الحساب</option>';
+                    var list = response ? (response.Data || response) : [];
+
+                    if (Array.isArray(list)) {
+                        $.each(list, function (index, account) {
+                            options += `<option value="${account.Id}">${account.Name}</option>`;
+                        });
+                    }
+
+                    $('#AccountId').html(options);
+                }
+            });
+        }
+
+
+        // تحميل العملات
+        function loadCurrencies() {
+
+            $.ajax({
+                url: '/Currencies/GetList',
+                type: 'GET',
+
+                success: function (response) {
+
+                    var options = '<option value="">اختر العملة</option>';
+                    var list = response ? (response.Data || response) : [];
+
+                    if (Array.isArray(list)) {
+                        $.each(list, function (index, currency) {
+                            options += `<option value="${currency.Id}">${currency.Name}</option>`;
+                        });
+                    }
+
+                    $('#CurrencyId').html(options);
+                }
+            });
+        }
+        function getAccountStatement() {
+
+            var accountVal = $('#AccountId').val();
+            var currencyVal = $('#CurrencyId').val();
+            var startVal = $('#StartDate').val();
+            var endVal = $('#EndDate').val();
+
+            var model = {
+                AccountId: accountVal ? accountVal : null,
+                CurrencyId: currencyVal ? currencyVal : null,
+                StartDate: startVal ? startVal : null,
+                EndDate: endVal ? endVal : null
+            };
+
+            $.ajax({
+                url: '/Documents/GetAccountStatement',
+                type: 'POST',
+                data: model,
+                success: function (result) {
+
+                    var rows = '';
+
+                    if (result && result.Data && result.Data.length > 0) {
+                        $.each(result.Data, function (i, item) {
+                            var formattedDate = item.Date ? new Date(item.Date).toLocaleDateString('ar-EG') : '';
+                            rows += `<tr>
+                                        <td>${formattedDate}</td>
+                                        <td>${item.Description || ''}</td>
+                                        <td>${item.Debit}</td>
+                                        <td>${item.Credit}</td>
+                                        <td>${item.Balance}</td>
+                                    </tr>`;
+                        });
+                    } else {
+                        rows = `<tr><td colspan="5" class="text-center text-muted">لا توجد بيانات للعرض</td></tr>`;
+                    }
+
+                    $('#statementBody').html(rows);
+                },
+                error: function() {
+                    $('#statementBody').html(`<tr><td colspan="5" class="text-center text-danger">حدث خطأ أثناء جلب كشف الحساب</td></tr>`);
+                }
+            });
+
+        }
+
+
+    </script>
+
+}

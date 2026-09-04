@@ -1,0 +1,783 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - نظام دفتر الحسابات الشخصية</title>
+
+    <!-- Bootstrap RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Custom CSS -->
+    @*<link rel="stylesheet" href="~/css/site.css" />*@
+
+    @await RenderSectionAsync("Styles", required: false)
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --sidebar-width: 280px;
+            --navbar-height: 70px;
+            --transition-speed: 0.3s;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark-color);
+            padding-top: var(--navbar-height);
+        }
+
+        /* Navbar */
+        .navbar {
+            height: var(--navbar-height);
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            padding: 0 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-brand i {
+                margin-left: 10px;
+                color: var(--accent-color);
+            }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%);
+            height: calc(100vh - var(--navbar-height));
+            position: fixed;
+            width: var(--sidebar-width);
+            box-shadow: var(--box-shadow);
+            transition: all var(--transition-speed) ease;
+            z-index: 1020;
+            top: var(--navbar-height);
+            right: 0;
+            overflow-y: auto;
+            border-top-left-radius: var(--border-radius);
+            border-bottom-left-radius: var(--border-radius);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+        }
+
+            .sidebar-header h3 {
+                font-weight: 700;
+                color: var(--primary-color);
+                margin: 0;
+                display: flex;
+                align-items: center;
+            }
+
+                .sidebar-header h3 i {
+                    margin-left: 10px;
+                    color: var(--accent-color);
+                }
+
+        .sidebar .nav-link {
+            color: #555;
+            border-radius: var(--border-radius);
+            margin: 0.25rem 1rem;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+            .sidebar .nav-link:hover {
+                background-color: rgba(67, 97, 238, 0.1);
+                color: var(--primary-color);
+                transform: translateX(-5px);
+            }
+
+            .sidebar .nav-link.active {
+                background-color: var(--primary-color);
+                color: white !important;
+                box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+            }
+
+            .sidebar .nav-link i {
+                margin-left: 12px;
+                width: 20px;
+                text-align: center;
+                font-size: 1.1rem;
+            }
+
+        .main-content {
+            margin-right: var(--sidebar-width);
+            transition: all var(--transition-speed) ease;
+            min-height: calc(100vh - var(--navbar-height));
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--border-radius);
+        }
+
+            .btn-primary:hover {
+                background-color: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+
+        /* User avatar */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .sidebar {
+                right: calc(-1 * var(--sidebar-width));
+            }
+
+                .sidebar.show {
+                    right: 0;
+                }
+
+            .main-content {
+                margin-right: 0;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background-color: white;
+            padding: 1.5rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.03);
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        /* Animation */
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 500;
+            border-radius: 50rem;
+        }
+
+        /* Modern SweetAlert Customizations */
+        .swal2-popup {
+            font-family: 'Tajawal', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 1.5rem !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        }
+
+        .swal2-title {
+            font-weight: 700 !important;
+            font-size: 1.35rem !important;
+        }
+
+        .swal2-styled.swal2-confirm {
+            background-color: var(--primary-color) !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+        }
+
+        .swal2-styled.swal2-cancel {
+            border-radius: 10px !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+        }
+
+        /* Modern Alert Banner Styling */
+        .custom-alert-banner {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1.25rem;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        /* Table styling */
+        .table {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+            .table thead th {
+                background-color: var(--primary-color);
+                color: white;
+                border-color: var(--secondary-color);
+            }
+
+        /* Form controls */
+        .form-control, .form-select {
+            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+            }
+
+        /* Logout button */
+        .logout-btn {
+            color: #dc3545;
+            transition: all 0.2s;
+        }
+
+            .logout-btn:hover {
+                color: #c82333;
+                transform: translateX(-3px);
+            }
+
+        /* Toggle button */
+        #sidebarToggle {
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            transition: all 0.2s;
+        }
+
+            #sidebarToggle:hover {
+                color: var(--secondary-color);
+                transform: scale(1.1);
+            }
+
+        /* Welcome message */
+        .welcome-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - var(--navbar-height) - 60px);
+            text-align: center;
+        }
+
+        .welcome-message {
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+            .welcome-message h1 {
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: var(--primary-color);
+            }
+
+            .welcome-message p {
+                font-size: 1.2rem;
+                margin-bottom: 2rem;
+                color: #555;
+            }
+
+        .auth-buttons .btn {
+            margin: 0 10px;
+            min-width: 150px;
+            font-size: 1.1rem;
+        }
+    </style>
+
+    <style>
+        html {
+            font-size: 14px;
+        }
+
+        @@media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+            box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
+        <div class="container-fluid">
+            <!-- Sidebar toggle button - يظهر فقط للمستخدمين المسجلين -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button class="navbar-toggler me-2" type="button" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            }
+            else
+            {
+
+            }
+
+            <!-- Brand -->
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-calculator"></i> نظام محاسبي
+            </a>
+
+            <!-- Right side items -->
+            <div class="d-flex align-items-center">
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar - يظهر فقط للمستخدمين المسجلين -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-chart-line"></i> القائمة الرئيسية</h3>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/Accounts/Index" class="nav-link">
+                        <i class="fas fa-file-invoice-dollar"></i> قائمة الحسابات
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Categories" asp-action="Index">
+                        <i class="fas fa-tags"></i> أنواع الحسابات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Currencies" asp-action="Index">
+                        <i class="fas fa-tags"></i> العملات
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Reports" asp-action="AccountsReport">
+                        <i class="fas fa-file-alt"></i> كشف حساب
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Documents" asp-action="DebititNofication">
+                        <i class="fas fa-exchange-alt"></i> اشعار مدين
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Documents" asp-action="CreditNofication">
+                        <i class="fas fa-exchange-alt"></i> اشعار دائن
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/Items/Index" class="nav-link">
+                        <i class="fas fa-boxes"></i> بيانات الأصناف
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/Users/Index" class="nav-link">
+                        <i class="fas fa-users-cog"></i> إدارة المستخدمين
+                    </a>
+                </li>
+
+                <li class="nav-item mt-4">
+                    @*<a href="#" class="nav-link logout-btn" onclick="handleFullLogout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                تسجيل خروج
+            </a>*@
+
+                    <form method="post" asp-controller="Users" asp-action="LogOff">
+                        <button type="submit" class="dropdown-item text-danger"><i class="nav-link logout-btn"></i>تسجيل الخروج</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    }
+    else
+    {
+
+    }
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent" style="@(!User.Identity.IsAuthenticated ? "margin-right: 0;" : "")">
+        <div class="container-fluid p-4">
+            <!-- Global TempData Alerts -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show custom-alert-banner d-flex align-items-center" role="alert">
+                    <i class="fas fa-check-circle me-2 fa-lg"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show custom-alert-banner d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show custom-alert-banner d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-circle me-2 fa-lg"></i>
+                    <div>@TempData["WarningMessage"]</div>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show custom-alert-banner d-flex align-items-center" role="alert">
+                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <div>@TempData["InfoMessage"]</div>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer text-center mt-auto">
+        <div class="container">
+            &copy; @DateTime.Now.Year - نظام دفتر الحسابات الشخصي السحابي - جميع الحقوق محفوظة
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Popper.js and Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Dropdown click handler fallback for absolute reliability
+            $(document).on('click', '[data-bs-toggle="dropdown"], [data-toggle="dropdown"]', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var $btn = $(this);
+                var $dropdownMenu = $btn.next('.dropdown-menu');
+                if (!$dropdownMenu.length) {
+                    $dropdownMenu = $btn.siblings('.dropdown-menu');
+                }
+                
+                var isOpen = $dropdownMenu.hasClass('show');
+                
+                // Close all open dropdown menus first
+                $('.dropdown-menu.show').removeClass('show');
+                $('[aria-expanded="true"]').attr('aria-expanded', 'false');
+                
+                if (!isOpen) {
+                    $dropdownMenu.addClass('show');
+                    $btn.attr('aria-expanded', 'true');
+                }
+            });
+
+            // Close dropdowns when clicking anywhere outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu.show').removeClass('show');
+                    $('[data-bs-toggle="dropdown"], [data-toggle="dropdown"]').attr('aria-expanded', 'false');
+                }
+            });
+
+            $('#sidebarToggle').click(function () {
+                $('#sidebar').toggleClass('show');
+                $('.main-content').toggleClass('show');
+            });
+
+            // Close sidebar when clicking outside on mobile
+            $('#mainContent').click(function () {
+                if ($(window).width() < 992 && $('#sidebar').hasClass('show')) {
+                    $('#sidebar').removeClass('show');
+                    $('.main-content').removeClass('show');
+                }
+            });
+
+            // Add active class to current nav link
+            var current = location.pathname;
+            $('.nav-link').each(function () {
+                var $this = $(this);
+                if ($this.attr('href') === current || current.indexOf($this.attr('href')) === 0) {
+                    $this.addClass('active');
+                }
+            });
+        });
+
+        // Auto-close alerts after 5 seconds
+        window.setTimeout(function () {
+            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 5000);
+
+        /*async function handleFullLogout() {
+            try {
+                // التحقق مما إذا كانت صفحة الأصناف أو الحسابات مفتوحة
+                if (window.location.pathname.includes("Items") || window.location.pathname.includes("Accounts")) {
+                    window.history.back(); // إرجاع المستخدم للخلف (إغلاق الصفحة الحالية)
+                    setTimeout(async () => {
+                        await fetch("/Users/Logout", { method: "GET" });
+                        window.location.href = "/Users/Login";
+                    }, 500);
+                } else {
+                    // تنفيذ تسجيل الخروج مباشرةً إذا لم يكن في صفحة الأصناف أو الحسابات
+                    await fetch("/Users/Logout", { method: "GET" });
+                    window.location.href = "/Users/Login";
+                }
+            } catch (error) {
+                console.error("خطأ في تسجيل الخروج:", error);
+            }
+        }*/
+
+        // Toast notification helper powered by Toastify & SweetAlert2
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+
+        function showSuccess(message) {
+            if (typeof Toastify !== 'undefined') {
+                Toastify({
+                    text: message,
+                    duration: 4000,
+                    close: true,
+                    gravity: "top",
+                    position: "left",
+                    style: {
+                        background: "linear-gradient(135deg, #2b9348 0%, #55a630 100%)",
+                        borderRadius: "10px",
+                        boxShadow: "0 4px 15px rgba(43, 147, 72, 0.3)",
+                        fontFamily: "Tajawal, sans-serif",
+                        fontWeight: "500"
+                    },
+                    stopOnFocus: true
+                }).showToast();
+            } else {
+                Toast.fire({ icon: 'success', title: message });
+            }
+        }
+
+        function showError(message, selector) {
+            if (typeof Toastify !== 'undefined') {
+                Toastify({
+                    text: message || "حدث خطأ غير متوقع",
+                    duration: 5000,
+                    close: true,
+                    gravity: "top",
+                    position: "left",
+                    style: {
+                        background: "linear-gradient(135deg, #d90429 0%, #ef233c 100%)",
+                        borderRadius: "10px",
+                        boxShadow: "0 4px 15px rgba(217, 4, 41, 0.3)",
+                        fontFamily: "Tajawal, sans-serif",
+                        fontWeight: "500"
+                    },
+                    stopOnFocus: true
+                }).showToast();
+            } else {
+                Toast.fire({ icon: 'error', title: message || "حدث خطأ غير متوقع" });
+            }
+            if (selector) $(selector).focus();
+        }
+
+        function showWarning(message) {
+            Toastify({
+                text: message,
+                duration: 4500,
+                close: true,
+                gravity: "top",
+                position: "left",
+                style: {
+                    background: "linear-gradient(135deg, #f77f00 0%, #fcbf49 100%)",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 15px rgba(247, 127, 0, 0.3)",
+                    fontFamily: "Tajawal, sans-serif",
+                    fontWeight: "500"
+                },
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        function showInfo(message) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                close: true,
+                gravity: "top",
+                position: "left",
+                style: {
+                    background: "linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%)",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 15px rgba(67, 97, 238, 0.3)",
+                    fontFamily: "Tajawal, sans-serif",
+                    fontWeight: "500"
+                },
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        // Unified SweetAlert confirmation dialog
+        function confirmAction(title, text, confirmButtonText, onConfirm) {
+            Swal.fire({
+                title: title || 'هل أنت متأكد؟',
+                text: text || 'لن تمكن من التراجع عن هذه العملية!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4361ee',
+                cancelButtonColor: '#d33',
+                confirmButtonText: confirmButtonText || 'نعم، قم بالتأكيد',
+                cancelButtonText: 'إلغاء',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    onConfirm();
+                }
+            });
+        }
+
+        function setReadOnly(selector, value) {
+            if (value == true) {
+                $(selector).removeClass("editable");
+                $(selector).addClass("readonly");
+            }
+            else if (value == false) {
+                $(selector).removeClass("readonly");
+                $(selector).addClass("editable");
+            }
+
+            $(selector).find("input").prop('readonly', value);
+            $(selector).find("select").prop('readonly', value);
+            $(selector).find("select").prop('disabled', value);
+        }
+
+        function setEnabled(selector, value) {
+            $(selector).prop('disabled', !value);
+        }
+
+        function isInRole(roleId) {
+            //var result = false;    
+            return $.getJSON("../Users/IsInRole", { RoleId: roleId },
+                function (response) {
+                    result = response;
+                    return result;
+                });
+        }
+
+        function openWindowWithPost(url, name, params) {
+            /*var timeStampInMs = new Date().getTime();
+            name = name + timeStampInMs;*/
+            console.log("name:" + name);
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", url);
+            form.setAttribute("target", name);
+            for (var i in params) {
+                if (params.hasOwnProperty(i)) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = i;
+                    input.value = params[i];
+                    form.appendChild(input);
+                }
+            }
+            document.body.appendChild(form);
+            window.open("post.htm", name, "width=" + screen.availWidth + ",height=" + screen.availHeight);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+    </script>
+
+    @await Component.InvokeAsync("Notyf")
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

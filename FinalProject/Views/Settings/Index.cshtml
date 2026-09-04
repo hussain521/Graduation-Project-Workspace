@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "الإعدادات";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3 text-center"><i class="fas fa-cog"></i> الإعدادات</h2>
+
+    <div class="row row-cols-3 row-cols-md-4 g-2 justify-content-center">
+        <div class="col">
+            <a href="/Settings/PersonalInfo" class="setting-item">
+                <i class="fas fa-user-circle"></i>
+                <span>الشخصية</span>
+            </a>
+        </div>
+        <div class="col">
+            <a asp-controller="Currencies" asp-action="Index" class="setting-item">
+                <i class="fas fa-money-bill"></i>
+                <span>العملات</span>
+            </a>
+        </div>
+        <div class="col">
+            <a asp-controller="Categories" asp-action="Index" class="setting-item">
+                <i class="fas fa-tags"></i>
+                <span>التصنيفات</span>
+            </a>
+        </div>
+        <div class="col">
+            <a href="/Settings/Security" class="setting-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>الأمان</span>
+            </a>
+        </div>
+        <div class="col">
+            <a href="/Settings/Backup" class="setting-item">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>النسخ</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .setting-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+        .setting-item i {
+            font-size: 22px;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .setting-item:hover {
+            background: #007bff;
+            color: white;
+            transform: scale(1.05);
+        }
+
+            .setting-item:hover i {
+                color: white;
+            }
+</style>

@@ -1,0 +1,59 @@
+﻿@model DevExpress.XtraReports.UI.XtraReport
+@using FinalProject
+@using FinalProject.Models
+@using DevExtreme.AspNet.Mvc
+@using DevExpress.AspNetCore
+@using DevExpress.AspNetCore.Reporting
+@addTagHelper *, DevExpress.AspNetCore.Reporting.v24.1
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>PrintDocument</title>
+    <link rel="stylesheet" href="~/lib/dx/reporting/css/thirdparty.bundle.css" />
+    <script src="~/lib/dx/reporting/js/thirdparty.bundle.js"></script>
+    <link rel="stylesheet" href="~/lib/dx/reporting/css/viewer.part.bundle.css" />
+    <script src="~/lib/dx/reporting/js/viewer.part.bundle.js"></script>
+
+    @*___*@
+    <script src="~/js/vendor.js"></script>
+    <script src="~/js/devextreme/jquery.js"></script>
+    <script src="~/js/devextreme/bootstrap.js"></script>
+    @*___*@    
+    @*___*@
+</head>
+<body>
+    @Html.DevExpress().WebDocumentViewer("DocumentViewer").Height("1000px").Bind(Model);
+</body>
+</html>
+
+@*@{
+        Layout = null;
+    }
+
+    <!DOCTYPE html>
+
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width" />
+        <title>PrintDocument</title>
+        <script src="~/lib/dx/reporting/js/vendor.js"></script>
+        <script src="~/lib/dx/reporting/js/devextreme/jquery.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="~/lib/dx/reporting/js/devextreme/bootstrap.js"></script>
+        <script src="https://cdn3.devexpress.com/jslib/21.1.11/js/bootstrap.js"></script>
+        <script src="https://cdn3.devexpress.com/jslib/21.1.11/js/dx.all.js"></script>
+
+        <link rel="stylesheet" href="~/lib/dx/reporting/css/reporting.viewer.part.bundle.css" />
+        <script src="~/lib/dx/reporting/js/reporting.viewer.part.bundle.js"></script>
+    </head>
+    <body>
+        @Html.DevExpress().WebDocumentViewer("DocumentViewer").Height("1000px").Bind(Model);
+    </body>
+    </html>*@

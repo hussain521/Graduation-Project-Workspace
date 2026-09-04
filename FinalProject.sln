@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalProject", "FinalProject\FinalProject.csproj", "{D4E34475-434E-432B-95B5-DDE6FD8281FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{C957823A-4B8F-4662-BB74-65C48B60C691}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{8039D22B-7560-48AC-9D20-DBC0EC2256BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{43FB75DB-D7D6-47F4-8125-DDE6C294C594}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D12283F6-7C5A-4CEB-9145-4D1143B4C3A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevExtreme NuGet.config", "DevExtreme NuGet.config", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4E34475-434E-432B-95B5-DDE6FD8281FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4E34475-434E-432B-95B5-DDE6FD8281FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4E34475-434E-432B-95B5-DDE6FD8281FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4E34475-434E-432B-95B5-DDE6FD8281FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C957823A-4B8F-4662-BB74-65C48B60C691}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C957823A-4B8F-4662-BB74-65C48B60C691}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C957823A-4B8F-4662-BB74-65C48B60C691}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C957823A-4B8F-4662-BB74-65C48B60C691}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8039D22B-7560-48AC-9D20-DBC0EC2256BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8039D22B-7560-48AC-9D20-DBC0EC2256BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8039D22B-7560-48AC-9D20-DBC0EC2256BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8039D22B-7560-48AC-9D20-DBC0EC2256BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43FB75DB-D7D6-47F4-8125-DDE6C294C594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43FB75DB-D7D6-47F4-8125-DDE6C294C594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43FB75DB-D7D6-47F4-8125-DDE6C294C594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43FB75DB-D7D6-47F4-8125-DDE6C294C594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D12283F6-7C5A-4CEB-9145-4D1143B4C3A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D12283F6-7C5A-4CEB-9145-4D1143B4C3A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D12283F6-7C5A-4CEB-9145-4D1143B4C3A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D12283F6-7C5A-4CEB-9145-4D1143B4C3A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {691E7A38-D8C9-4171-BA60-893A5938BBDA}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://dev.azure.com/graduation20250323
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = API\\API.csproj
+		SccProjectName1 = API
+		SccLocalPath1 = API
+		SccProjectUniqueName2 = Domain\\Domain.csproj
+		SccProjectName2 = Domain
+		SccLocalPath2 = Domain
+		SccProjectUniqueName3 = FinalProject\\FinalProject.csproj
+		SccProjectName3 = FinalProject
+		SccLocalPath3 = FinalProject
+		SccProjectUniqueName4 = Infrastructure\\Infrastructure.csproj
+		SccProjectName4 = Infrastructure
+		SccLocalPath4 = Infrastructure
+		SccProjectUniqueName5 = Shared\\Shared.csproj
+		SccProjectName5 = Shared
+		SccLocalPath5 = Shared
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,187 @@
+﻿@{
+    ViewData["Title"] = "كشف الحساب";
+}
+
+<div class="container mt-5 pt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h3 class="mb-0">كشف الحساب</h3>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-light" id="printReport"><i class="fas fa-print"></i> طباعة</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- فلاتر البحث -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="accountFilter" class="form-label">الحساب</label>
+                    <select class="form-select" id="accountFilter">
+                        <option value="">كل الحسابات</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="currencyFilter" class="form-label">العملة</label>
+                    <select class="form-select" id="currencyFilter">
+                        <option value="">كل العملات</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="startDate" class="form-label">من تاريخ</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-2">
+                    <label for="endDate" class="form-label">إلى تاريخ</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <button class="btn btn-primary w-100" id="filterBtn">تطبيق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول عرض نتائج كشف الحساب مباشرة في الصفحة -->
+    <div class="card mt-4" id="statementResultsCard">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-table me-2"></i>تفاصيل كشف الحساب</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="statementGrid">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البيان / الوصف</th>
+                            <th>مدين</th>
+                            <th>دائن</th>
+                            <th>الرصيد</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statementReportBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">اضغط على زر (تطبيق) لعرض البيانات أو (طباعة) لفتح التقرير الطباعي</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // تحميل بيانات الفلاتر
+            loadAccounts();
+            loadCurrencies();
+
+            // طباعة التقرير
+            $('#printReport').click(function () {
+                loadAccountStatement(); // استخدام الفلاتر وفتح التقرير
+            });
+
+            $('#filterBtn').click(function () {
+                loadAccountStatementGrid(); // عرض البيانات مباشرة بالصفحة
+            });
+
+            function loadAccountStatementGrid() {
+                var accountVal = $('#accountFilter').val();
+                var currencyVal = $('#currencyFilter').val();
+                var startVal = $('#startDate').val();
+                var endVal = $('#endDate').val();
+
+                var model = {
+                    AccountId: accountVal ? accountVal : null,
+                    CurrencyId: currencyVal ? currencyVal : null,
+                    StartDate: startVal ? startVal : null,
+                    EndDate: endVal ? endVal : null
+                };
+
+                $.ajax({
+                    url: '/Documents/GetAccountStatement',
+                    type: 'POST',
+                    data: model,
+                    success: function (result) {
+                        var rows = '';
+                        if (result && result.Data && result.Data.length > 0) {
+                            $.each(result.Data, function (i, item) {
+                                var formattedDate = item.Date ? new Date(item.Date).toLocaleDateString('ar-EG') : '';
+                                rows += `<tr>
+                                            <td>${formattedDate}</td>
+                                            <td>${item.Description || ''}</td>
+                                            <td>${item.Debit}</td>
+                                            <td>${item.Credit}</td>
+                                            <td>${item.Balance}</td>
+                                        </tr>`;
+                            });
+                        } else {
+                            rows = `<tr><td colspan="5" class="text-center text-muted">لا توجد بيانات لهذا الحساب / الفلتر</td></tr>`;
+                        }
+                        $('#statementReportBody').html(rows);
+                    },
+                    error: function () {
+                        $('#statementReportBody').html(`<tr><td colspan="5" class="text-center text-danger">حدث خطأ أثناء جلب البيانات</td></tr>`);
+                    }
+                });
+            }
+
+            function loadAccounts() {
+                $.ajax({
+                    url: '/Accounts/GetList',
+                    type: 'GET',
+                    success: function (response) {
+                        var options = '<option value="">كل الحسابات</option>';
+                        var list = response ? (response.Data || response) : [];
+                        if (Array.isArray(list)) {
+                            $.each(list, function (index, account) {
+                                options += `<option value="${account.Id}">${account.Name}</option>`;
+                            });
+                        }
+                        $('#accountFilter').html(options);
+                    }
+                });
+            }
+
+            function loadCurrencies() {
+                $.ajax({
+                    url: '/Currencies/GetList',
+                    type: 'GET',
+                    success: function (response) {
+                        var options = '<option value="">كل العملات</option>';
+                        var list = response ? (response.Data || response) : [];
+                        if (Array.isArray(list)) {
+                            $.each(list, function (index, currency) {
+                                var symbolStr = currency.Symbol ? ` (${currency.Symbol})` : '';
+                                options += `<option value="${currency.Id}">${currency.Name}${symbolStr}</option>`;
+                            });
+                        }
+                        $('#currencyFilter').html(options);
+                    }
+                });
+            }
+
+            function loadAccountStatement() {                
+                var accountId = $('#accountFilter').val();
+                
+                var currencyId = $('#currencyFilter').val();
+                
+                var startDate = $('#startDate').val();
+                
+                var endDate = $('#endDate').val();
+                
+                openWindowWithPost('../Reports/AccountStateReport/', 'PopupWindow', {
+                    AccountId: accountId,
+                    CurrencyId: currencyId,
+                    StartDate: startDate,
+                    EndDate: endDate
+                });
+            }
+        });
+    </script>
+}

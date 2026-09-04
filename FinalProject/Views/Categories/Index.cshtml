@@ -1,0 +1,180 @@
+﻿@{
+    ViewData["Title"] = "إدارة أنواع الحسابات";
+}
+
+<div class="container mt-5 pt-4">
+    <h2 class="text-center">إدارة أنواع الحسابات</h2>
+
+    <div class="row align-items-center mb-3">
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" id="createNewCategory">إضافة نوع جديد</button>
+        </div>
+        <div class="col-md-9">
+            <input id="ListInput" class="form-control" type="text" placeholder="ابحث هنا">
+        </div>
+    </div>
+
+    <table class="table table-bordered mt-3" id="ListTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>تاريخ الإضافة</th>
+                <th>المستخدم</th>                
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تحميل البيانات هنا عبر AJAX -->
+        </tbody>
+    </table>
+</div>
+
+<!-- نافذة إضافة/تعديل النوع -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">إضافة نوع جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="CategoryId" />
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">الاسم</label>
+                        <input type="text" class="form-control" id="Name" required />
+                        <div class="invalid-feedback">يرجى إدخال اسم النوع</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveCategory">حفظ</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadCategories();
+
+            // البحث الفوري
+            $("#ListInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#ListTable .tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // تحميل أنواع الحسابات من الخادم
+            function loadCategories() {
+                $.ajax({
+                    url: '/Categories/GetAll',
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        var rows = '';
+                        $.each(response.Data, function (index, category) {
+                            rows += `<tr class="tr">
+                                        <td>${category.Name}</td>
+                                        <td>${new Date(category.AddDate).toLocaleDateString()}</td>
+                                        <td>${category.User?.UserName ?? ''}</td>                                        
+                                        <td>
+                                            <button class="btn btn-warning editCategory" data-id="${category.Id}">تعديل</button>
+                                            <button class="btn btn-danger deleteCategory" data-id="${category.Id}">حذف</button>
+                                        </td>
+                                    </tr>`;
+                        });
+                        $('#ListTable tbody').html(rows);
+                    }
+                });
+            }
+
+            // عرض نافذة إضافة نوع جديد
+            $('#createNewCategory').click(function () {
+                $('#categoryModal').modal('show');
+                $('#categoryModalLabel').text('إضافة نوع جديد');
+                $('#categoryForm')[0].reset();
+                $('#CategoryId').val('');
+            });
+
+            // حفظ النوع (إضافة أو تعديل)
+            $('#saveCategory').click(function () {
+                var id = $('#CategoryId').val();
+                var url = id ? '/Categories/Update' : '/Categories/Add';
+
+                if (!$('#Name').val()) {
+                    $('#Name').addClass('is-invalid');
+                    return;
+                } else {
+                    $('#Name').removeClass('is-invalid');
+                }
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        Id: id,
+                        Name: $('#Name').val()
+                    },
+                    success: function (response) {
+                        if (response && response.IsSuccess) {
+                            $('#categoryModal').modal('hide');
+                            $('#categoryForm')[0].reset();
+                            $('#CategoryId').val('');
+                            loadCategories();
+                            showSuccess(response.Message || 'تم حفظ نوع الحساب بنجاح');
+                        } else {
+                            var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && response.Message) || 'لم تكتمل عملية الحفظ';
+                            showError(msg);
+                        }
+                    },
+                    error: function () {
+                        showError('حدث خطأ أثناء الاتصال بالخادم');
+                    }
+                });
+            });
+
+            // تعديل النوع
+            $(document).on('click', '.editCategory', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: `/Categories/FindById/${id}`,
+                    type: 'GET',
+                    success: function (category) {
+                        $('#categoryModal').modal('show');
+                        $('#categoryModalLabel').text('تعديل النوع');
+                        $('#CategoryId').val(category.Data.Id);
+                        $('#Name').val(category.Data.Name);
+                    }
+                });
+            });
+
+            // حذف النوع
+            $(document).on('click', '.deleteCategory', function () {
+                var id = $(this).data('id');
+                confirmAction('تأكيد الحذف', 'هل أنت متأكد أنك تريد حذف هذا النوع؟ سيتم حذف جميع الحسابات المرتبطة به أيضًا.', 'نعم، احذف', function () {
+                    $.ajax({
+                        url: '/Categories/Delete',
+                        type: 'POST',
+                        data: { Id: id },
+                        success: function (response) {
+                            if (response && response.IsSuccess) {
+                                loadCategories();
+                                showSuccess(response.Message || 'تم حذف نوع الحساب بنجاح');
+                            } else {
+                                var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && response.Message) || 'لم يتم الحذف';
+                                showError(msg);
+                            }
+                        },
+                        error: function () {
+                            showError('حدث خطأ أثناء الاتصال بالخادم');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

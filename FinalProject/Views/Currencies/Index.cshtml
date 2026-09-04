@@ -1,0 +1,162 @@
+﻿@{
+    ViewData["Title"] = "إدارة العملات";
+}
+
+<div class="container mt-5 pt-4">
+    <h2 class="text-center">إدارة العملات</h2>
+    <button class="btn btn-primary" id="createNewCurrency">إضافة عملة جديدة</button>
+    <table class="table table-bordered mt-3" id="currenciesTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الرمز</th>
+                <th>محلي</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تحميل البيانات هنا عبر AJAX -->
+        </tbody>
+    </table>
+</div>
+
+<!-- نافذة إضافة/تعديل العملة -->
+<div class="modal fade" id="currencyModal" tabindex="-1" aria-labelledby="currencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="currencyModalLabel">إضافة عملة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="currencyForm">
+                    <input type="hidden" id="CurrencyId" />
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">الاسم</label>
+                        <input type="text" class="form-control" id="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Symbol" class="form-label">الرمز</label>
+                        <input type="text" class="form-control" id="Symbol" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="IsLocal" class="form-label">محلي</label>
+                        <select class="form-control" id="IsLocal" required>
+                            <option value="true">نعم</option>
+                            <option value="false">لا</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="saveCurrency">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadCurrencies();
+
+            function loadCurrencies() {
+                $.ajax({
+                    url: '/Currencies/GetAll',
+                    type: 'GET',
+                    success: function (response) {
+                        var rows = '';
+                        $.each(response.data, function (index, currency) {
+                            rows += `<tr>
+                                <td>${currency.name}</td>
+                                <td>${currency.symbol}</td>
+                                <td>${currency.isLocal ? 'نعم' : 'لا'}</td>
+                                <td>
+                                    <button class="btn btn-warning editCurrency" data-id="${currency.id}">تعديل</button>
+                                    <button class="btn btn-danger deleteCurrency" data-id="${currency.id}">حذف</button>
+                                </td>
+                            </tr>`;
+                        });
+                        $('#currenciesTable tbody').html(rows);
+                    }
+                });
+            }
+
+            $('#createNewCurrency').click(function () {
+                $('#currencyModal').modal('show');
+                $('#currencyModalLabel').text('إضافة عملة جديدة');
+                $('#currencyForm')[0].reset();
+                $('#CurrencyId').val('');
+            });
+
+            $('#saveCurrency').click(function () {
+                var id = $('#CurrencyId').val();
+                var url = id ? '/Currencies/Update' : '/Currencies/Add';
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        name: $('#Name').val(),
+                        symbol: $('#Symbol').val(),
+                        isLocal: $('#IsLocal').val() === 'true'
+                    },
+                    success: function (response) {
+                        if (response && (response.IsSuccess || response.success)) {
+                            $('#currencyModal').modal('hide');
+                            loadCurrencies();
+                            showSuccess(response.Message || response.message || 'تم حفظ العملة بنجاح');
+                        } else {
+                            var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && (response.Message || response.message)) || 'لم تكتمل عملية الحفظ';
+                            showError(msg);
+                        }
+                    },
+                    error: function () {
+                        showError('حدث خطأ أثناء الاتصال بالخادم');
+                    }
+                });
+            });
+
+            $(document).on('click', '.editCurrency', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: `/Currencies/FindById/${id}`,
+                    type: 'GET',
+                    success: function (currency) {
+                        $('#currencyModal').modal('show');
+                        $('#currencyModalLabel').text('تعديل العملة');
+                        $('#CurrencyId').val(currency.id);
+                        $('#Name').val(currency.name);
+                        $('#Symbol').val(currency.symbol);
+                        $('#IsLocal').val(currency.isLocal.toString());
+                    }
+                });
+            });
+
+            $(document).on('click', '.deleteCurrency', function () {
+                var id = $(this).data('id');
+                confirmAction('تأكيد الحذف', 'هل أنت متأكد أنك تريد حذف هذه العملة؟', 'نعم، احذف', function () {
+                    $.ajax({
+                        url: '/Currencies/Delete',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (response) {
+                            if (response && (response.IsSuccess || response.success)) {
+                                loadCurrencies();
+                                showSuccess(response.Message || response.message || 'تم حذف العملة بنجاح');
+                            } else {
+                                var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && (response.Message || response.message)) || 'لم يتم الحذف';
+                                showError(msg);
+                            }
+                        },
+                        error: function () {
+                            showError('حدث خطأ أثناء الاتصال بالخادم');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

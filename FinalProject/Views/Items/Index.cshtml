@@ -1,0 +1,236 @@
+﻿@{
+    ViewData["Title"] = "إدارة الأصناف";
+}
+
+<div class="container mt-5 pt-4">
+    <h2 class="text-center">إدارة الأصناف</h2>
+
+    <div class="row align-items-center mb-3">
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" id="createNewItem">إضافة صنف جديد</button>
+        </div>
+        <div class="col-md-9">
+            <input id="ListInput" class="form-control" type="text" placeholder="ابحث هنا">
+        </div>
+    </div>
+
+    <table class="table table-bordered mt-3" id="ListTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>السعر</th>
+                <th>العملة</th>
+                <th>تاريخ الإضافة</th>
+                <th>تاريخ التعديل</th>
+                <th>المستخدم</th>                
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تحميل البيانات هنا عبر AJAX -->
+        </tbody>
+    </table>
+</div>
+
+<!-- نافذة إضافة/تعديل الصنف -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalLabel">إضافة صنف جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" id="ItemId" />
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">الاسم</label>
+                        <input type="text" class="form-control" id="Name" required maxlength="50" />
+                        <div class="invalid-feedback">يرجى إدخال اسم الصنف (حد أقصى 50 حرفاً)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Price" class="form-label">السعر</label>
+                        <input type="number" step="0.01" class="form-control" id="Price" required />
+                        <div class="invalid-feedback">يرجى إدخال سعر صحيح</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CurrencyId" class="form-label">العملة</label>
+                        <select class="form-control" id="CurrencyId" required>
+                            <option value="">-- اختر العملة --</option>
+                            <!-- سيتم ملء الخيارات عبر JavaScript -->
+                        </select>
+                        <div class="invalid-feedback">يرجى اختيار العملة</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveItem">حفظ</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadItems();
+            loadCurrencies();
+
+            // البحث الفوري
+            $("#ListInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#ListTable .tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // تحميل الأصناف من الخادم
+            function loadItems() {
+                $.ajax({
+                    url: '/Items/GetAll',
+                    type: 'GET',
+                    success: function (response) {
+                        var rows = '';
+                        $.each(response.Data, function (index, item) {
+                            rows += `<tr class="tr">
+                                        <td>${item.Name}</td>
+                                        <td>${item.Price?.toFixed(2) || '0.00'}</td>
+                                        <td>${item.Currency?.Name || ''} (${item.Currency?.Symbol || ''})</td>
+                                        <td>${new Date(item.AddDate).toLocaleDateString()}</td>
+                                        <td>${item.LastModifiedDate ? new Date(item.LastModifiedDate).toLocaleDateString() : '-'}</td>
+                                        <td>${item.User?.UserName || ''}</td>                                        
+                                        <td>
+                                            <button class="btn btn-warning editItem" data-id="${item.Id}">تعديل</button>
+                                            <button class="btn btn-danger deleteItem" data-id="${item.Id}">حذف</button>
+                                        </td>
+                                    </tr>`;
+                        });
+                        $('#ListTable tbody').html(rows);
+                    }
+                });
+            }
+
+            // تحميل العملات لاستخدامها في القائمة المنسدلة
+            function loadCurrencies() {
+                $.ajax({
+                    url: '/Currencies/GetAll',
+                    type: 'GET',
+                    success: function (response) {
+                        var options = '<option value="">-- اختر العملة --</option>';
+                        $.each(response.Data, function (index, currency) {
+                            options += `<option value="${currency.Id}">${currency.Name} (${currency.Symbol})</option>`;
+                        });
+                        $('#CurrencyId').html(options);
+                    }
+                });
+            }
+
+            // عرض نافذة إضافة صنف جديد
+            $('#createNewItem').click(function () {
+                $('#itemModal').modal('show');
+                $('#itemModalLabel').text('إضافة صنف جديد');
+                $('#itemForm')[0].reset();
+                $('#ItemId').val('');
+            });
+
+            // حفظ الصنف (إضافة أو تعديل)
+            $('#saveItem').click(function () {
+                // التحقق من الصحة
+                let isValid = true;
+                if (!$('#Name').val()) {
+                    $('#Name').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#Name').removeClass('is-invalid');
+                }
+
+                if (!$('#Price').val() || isNaN(parseFloat($('#Price').val()))) {
+                    $('#Price').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#Price').removeClass('is-invalid');
+                }
+
+                if (!$('#CurrencyId').val()) {
+                    $('#CurrencyId').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#CurrencyId').removeClass('is-invalid');
+                }
+
+                if (!isValid) return;
+
+                var id = $('#ItemId').val();
+                var url = id ? '/Items/Update' : '/Items/Add';
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        Id: id,
+                        Name: $('#Name').val(),
+                        Price: parseFloat($('#Price').val()),
+                        CurrencyId: $('#CurrencyId').val()
+                    },
+                    success: function (response) {
+                        if (response && response.IsSuccess) {
+                            $('#itemModal').modal('hide');
+                            $('#itemForm')[0].reset();
+                            $('#ItemId').val('');
+                            loadItems();
+                            showSuccess(response.Message || 'تم حفظ الصنف بنجاح');
+                        } else {
+                            var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && response.Message) || 'حدث خطأ أثناء الحفظ';
+                            showError(msg);
+                        }
+                    },
+                    error: function () {
+                        showError('حدث خطأ أثناء الاتصال بالخادم');
+                    }
+                });
+            });
+
+            // تعديل الصنف
+            $(document).on('click', '.editItem', function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: `/Items/FindById/${id}`,
+                    type: 'GET',
+                    success: function (item) {
+                        $('#itemModal').modal('show');
+                        $('#itemModalLabel').text('تعديل الصنف');
+                        $('#ItemId').val(item.Data.Id);
+                        $('#Name').val(item.Data.Name);
+                        $('#Price').val(item.Data.Price?.toFixed(2) || '0.00');
+                        $('#CurrencyId').val(item.Data.CurrencyId);
+                    }
+                });
+            });
+
+            // حذف الصنف
+            $(document).on('click', '.deleteItem', function () {
+                var id = $(this).data('id');
+                confirmAction('تأكيد الحذف', 'هل أنت متأكد أنك تريد حذف هذا الصنف؟', 'نعم، احذف', function () {
+                    $.ajax({
+                        url: '/Items/Delete',
+                        type: 'POST',
+                        data: { Id: id },
+                        success: function (response) {
+                            if (response && response.IsSuccess) {
+                                loadItems();
+                                showSuccess(response.Message || 'تم حذف الصنف بنجاح');
+                            } else {
+                                var msg = (response && response.Error && response.Error.Messages && response.Error.Messages[0]) || (response && response.Message) || 'لم يتم حذف الصنف';
+                                showError(msg);
+                            }
+                        },
+                        error: function () {
+                            showError('حدث خطأ أثناء الاتصال بالخادم');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

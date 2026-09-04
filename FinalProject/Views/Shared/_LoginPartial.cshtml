@@ -1,0 +1,49 @@
+﻿@*@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager*@
+
+@if (User.Identity.IsAuthenticated)
+{
+    <!-- Notifications -->
+    <div class="dropdown me-3">
+        <button class="btn btn-light position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" data-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                3
+            </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+            <li><h6 class="dropdown-header">الإشعارات</h6></li>
+            <li><a class="dropdown-item" href="#">طلب تسجيل حساب</a></li>
+            <li><a class="dropdown-item" href="#">رسالة من العميل</a></li>
+            <li><a class="dropdown-item" href="#">تحديث النظام</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-primary" href="#">عرض الكل</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="btn btn-light dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" data-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-circle user-avatar me-2" style="font-size:32px; vertical-align: middle;"></i>
+            <span>@User.Identity?.Name</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" asp-controller="Settings" asp-action="Index"><i class="fas fa-cog me-2"></i>الإعدادات</a></li>
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- نموذج لتسجيل الخروج -->
+            <li>
+                <form method="post" asp-controller="Users" asp-action="LogOff">
+                    <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="d-flex">
+        <a class="btn btn-outline-primary me-2" href="/Users/Register">تسجيل</a>
+        <a class="btn btn-primary" href="/Users/Login">دخول</a>
+    </div>
+}

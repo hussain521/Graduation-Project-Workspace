@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (!User.Identity.IsAuthenticated)
+{
+    <!-- رسالة الترحيب للزوار غير المسجلين -->
+    <div class="welcome-container fade-in">
+        <div class="welcome-message">
+            <h1 class="display-4">مرحباً بك في نظام المحاسبة الشخصي</h1>
+            <p class="lead">قم بتسجيل الدخول للوصول إلى جميع الميزات وإدارة حساباتك المالية بكل سهولة</p>
+            <div class="auth-buttons">
+                <a class="btn btn-primary btn-lg" href="/Users/Login">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </a>
+                <a class="btn btn-outline-primary btn-lg" href="/Users/Register">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+                </a>
+            </div>
+        </div>
+    </div>
+}
